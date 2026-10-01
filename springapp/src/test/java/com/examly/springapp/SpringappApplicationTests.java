@@ -148,7 +148,7 @@ class SpringappApplicationTests {
     @Test
     @Order(7)
     void backend_testAddCourseWithRoleValidation() throws Exception {
-        String requestBody = "{\"courseType\": \"Web Development\", \"courseImageUrl\": \"https://8080-abccefeedacacecccdadbbfacbafdfacaeaeacfdedbcbce.premiumproject.examly.io/course.png\", \"courseDetails\": \"Full stack web development course\", \"coursePrice\": 1999.0}";
+        String requestBody = "{\"courseType\": \"Web Development\", \"courseImageUrl\": \"https://8080-abcbaaaeacafecdadbbfacbafdfacaeaeacfdedbcbce.premiumproject.examly.io/course.png\", \"courseDetails\": \"Full stack web development course\", \"coursePrice\": 1999.0}";
 
         HttpEntity<String> adminRequest = new HttpEntity<>(requestBody, createHeaders(admintoken));
         ResponseEntity<String> adminResponse = restTemplate.exchange("/api/course", HttpMethod.POST, adminRequest, String.class);
