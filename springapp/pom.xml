@@ -10,10 +10,10 @@
         <relativePath/>
     </parent>
     <groupId>com.examly</groupId>
-    <artifactId>springapp</artifactId>
+    <artifactId>springapp</artifactId>  
     <version>0.0.1-SNAPSHOT</version>
     <name>springapp</name>
-    <description>E-Learning Platform Backend</description>
+    <description>E-Learning Platform Backend</description>  
     <properties>
         <java.version>17</java.version>
     </properties>
