@@ -39,14 +39,12 @@ logs/
 # Node dependencies
 node_modules/
 
-application.properties
-
 # Angular build output
 dist/
 .angular/
 tmp/
 out-tsc/
-package-lock.json/
+package-lock.json
 
 # Angular cache
 .cache/
