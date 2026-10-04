@@ -37,6 +37,7 @@ logs/
 # ==============================
 
 # Node dependencies
+node_modules/
 
 # Angular build output
 dist/
