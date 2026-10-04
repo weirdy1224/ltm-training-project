@@ -37,9 +37,6 @@ logs/
 # ==============================
 
 # Node dependencies
-node_modules/
-
-application.properties
 
 # Angular build output
 dist/
@@ -88,3 +85,18 @@ coverage/
 *.temp
 *.swp
 *.swo
+
+
+
+# Maven
+springapp/pom.xml
+
+# Spring Boot tests
+springapp/src/test/
+
+# Karma project
+karma/
+
+# Karma reports
+karma-coverage/
+coverage/
