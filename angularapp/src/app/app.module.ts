@@ -1,66 +1,41 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HomeComponent } from './components/home/home.component';
-import { LoginComponent } from './components/login/login.component';
-import { RegistrationComponent } from './components/registration/registration.component';
-import { NavbarComponent } from './components/navbar/navbar.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { CustomerdashboardComponent } from './components/customerdashboard/customerdashboard.component';
-import { CustomerProfileComponent } from './components/customer-profile/customer-profile.component';
-import { CustomerViewCoursesComponent } from './components/customer-view-courses/customer-view-courses.component';
-import { CourseDetailsComponent } from './components/course-details/course-details.component';
-import { MyCartComponent } from './components/my-cart/my-cart.component';
-import { PlaceOrderComponent } from './components/place-order/place-order.component';
-import { MyOrdersComponent } from './components/my-orders/my-orders.component';
-import { OrderDetailsComponent } from './components/order-details/order-details.component';
-import { ViewOrdersComponent } from './components/view-orders/view-orders.component';
-import { ViewCoursesComponent } from './components/view-courses/view-courses.component';
-import { AddCourseComponent } from './components/add-course/add-course.component';
-import { EditCourseComponent } from './components/edit-course/edit-course.component';
-import { AddReviewComponent } from './components/add-review/add-review.component';
-import { ViewReviewComponent } from './components/view-review/view-review.component';
-import { ManageAdminsComponent } from './components/manage-admins/manage-admins.component';
-import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
-import { ErrorComponent } from './components/error/error.component';
-import { CourseCardComponent } from './shared/course-card/course-card.component';
-import { StarRatingComponent } from './shared/star-rating/star-rating.component';
+import { SharedModule } from './shared/shared/shared.module';
+import { AuthInterceptor } from './services/auth.interceptor';
+import { AuthService } from './services/auth.service';
 
+import { NavbarComponent } from './components/navbar/navbar.component';
+import { HomeComponent } from './components/home/home.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { ErrorComponent } from './components/error/error.component';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+
+/**
+ * Only what every visitor needs is loaded up front: the navbar, home, dashboard, error page and the dialog.
+ * Login, admin, customer and course-detail pages are lazy modules (see app-routing.module.ts).
+ *
+ * @author Team Lead
+ */
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    LoginComponent,
-    RegistrationComponent,
-    NavbarComponent,
-    DashboardComponent,
-    CustomerdashboardComponent,
-    CustomerProfileComponent,
-    CustomerViewCoursesComponent,
-    CourseDetailsComponent,
-    MyCartComponent,
-    PlaceOrderComponent,
-    MyOrdersComponent,
-    OrderDetailsComponent,
-    ViewOrdersComponent,
-    ViewCoursesComponent,
-    AddCourseComponent,
-    EditCourseComponent,
-    AddReviewComponent,
-    ViewReviewComponent,
-    ManageAdminsComponent,
-    ConfirmDialogComponent,
-    ErrorComponent,
-    CourseCardComponent,
-    StarRatingComponent
+  declarations: [AppComponent, NavbarComponent, HomeComponent, DashboardComponent, ErrorComponent, ConfirmDialogComponent],
+  imports: [BrowserModule, BrowserAnimationsModule, HttpClientModule, SharedModule, AppRoutingModule],
+  providers: [
+    // the token is added to API calls here and nowhere else (guideline 24)
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    // after a page reload, bring the session back (saved token or refresh cookie) before the first page renders
+    {
+      provide: APP_INITIALIZER,
+      multi: true,
+      deps: [AuthService],
+      useFactory: (auth: AuthService) => () => firstValueFrom(auth.restoreSession())
+    }
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule
-  ],
-  providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}
