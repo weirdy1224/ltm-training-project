@@ -38,6 +38,11 @@ logs/
 
 # Node dependencies
 
+
+node_modules/
+
+application.properties
+
 # Angular build output
 dist/
 .angular/
