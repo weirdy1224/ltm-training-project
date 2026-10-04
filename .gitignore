@@ -37,6 +37,7 @@ logs/
 # ==============================
 
 # Node dependencies
+node_modules/
 
 
 node_modules/
@@ -94,7 +95,7 @@ coverage/
 
 
 # Maven
-springapp/pom.xml
+
 
 # Spring Boot tests
 springapp/src/test/
