@@ -90,7 +90,7 @@ coverage/
 
 
 # Maven
-springapp/pom.xml
+
 
 # Spring Boot tests
 springapp/src/test/
