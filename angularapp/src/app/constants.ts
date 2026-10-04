@@ -1,3 +1,9 @@
+/**
+ * Every API URL, storage key and role name of the app lives here, so nothing is hard-coded in components or services.
+ * The host part (http://localhost:8080) comes from environments/environment.ts.
+ *
+ * @author Team Lead
+ */
 import { environment } from "src/environments/environment.prod";
 
 export const API_URL: string = environment.apiUrl;
