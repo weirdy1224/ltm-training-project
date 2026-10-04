@@ -1,17 +1,17 @@
 package com.examly.springapp.service;
 
 import com.examly.springapp.model.Orders;
-
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Business operations on orders.
+ *
+ * @author Tanvi
+ */
 public interface OrderService {
-
     Orders addOrder(Orders order);
-
     List<Orders> getAllOrders();
-
-    Optional<Orders> getOrderById(Long orderId);
-
+    Orders getOrderById(Long orderId);
     List<Orders> getOrdersByCustomerId(Long customerId);
+    Orders deleteOrder(Long orderId);
 }
