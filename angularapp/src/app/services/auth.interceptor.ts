@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthService } from './auth.service';
-import { PUBLIC_API_PATTERN } from '../constants';
+import { PUBLIC_API_PATTERN } from '../constant';
 
 /**
  * Adds the Bearer token to API calls. When the backend answers 401 (token expired) it

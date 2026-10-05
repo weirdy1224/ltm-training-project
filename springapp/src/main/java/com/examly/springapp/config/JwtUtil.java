@@ -93,4 +93,7 @@ public class JwtUtil {
             return false;
         }
     }
+    public boolean validateToken(String token) {
+        return isValid(token);
+        }
 }
