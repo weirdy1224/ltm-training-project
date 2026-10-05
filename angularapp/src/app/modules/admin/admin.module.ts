@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { SharedModule } from '../../shared/shared.module';
+import { SharedModule } from 'src/app/shared/shared/shared.module';
 import { AddCourseComponent } from '../../components/add-course/add-course.component';
 import { EditCourseComponent } from '../../components/edit-course/edit-course.component';
 import { ViewCoursesComponent } from '../../components/view-courses/view-courses.component';
 import { ViewOrdersComponent } from '../../components/view-orders/view-orders.component';
 import { ViewReviewComponent } from '../../components/view-review/view-review.component';
 import { ConfirmDialogComponent } from 'src/app/components/confirm-dialog/confirm-dialog.component';
-import { ManageAdminsComponent } from 'src/app/manage-admins/manage-admins/manage-admins.component';
+import { ManageAdminsComponent } from 'src/app/components/manage-admins/manage-admins.component';
 
 const routes: Routes = [
   { path: 'add-course', component: AddCourseComponent },

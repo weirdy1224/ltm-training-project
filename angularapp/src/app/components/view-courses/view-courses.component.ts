@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
-import { PAGE_SIZE } from '../../constant';
+import { PAGE_SIZE } from 'src/app/constant';
 import { Course } from '../../models/course.model';
 import { CourseRating } from '../../models/course-rating.model';
 import { CartService } from '../../services/cart.service';

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 import { BehaviorSubject } from 'rxjs';
-import { STORAGE } from '../constants';
+import { STORAGE } from '../constant';
 import { AuthUser } from '../models/auth-user.model';
 
 /**

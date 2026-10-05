@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { API,API_URL,STORAGE } from '../constants';
+import { API,API_URL,STORAGE } from '../constant';
 import { AdminStats, CustomerStats } from '../models/stats.model';
 
 /**

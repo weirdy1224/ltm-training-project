@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
-import { API,API_URL,STORAGE } from '../constants';
+import { API,API_URL,STORAGE } from '../constant';
 import { Login } from '../models/login.model';
 import { User } from '../models/user.model';
 import { UserStoreService } from './user-store.service';
