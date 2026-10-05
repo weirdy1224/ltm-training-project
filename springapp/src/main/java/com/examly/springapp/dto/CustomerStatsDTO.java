@@ -14,7 +14,7 @@ public class CustomerStatsDTO {
     @PositiveOrZero
     private long ordersPlaced;
     @PositiveOrZero
-    private long cartItems;
+    private long cartItems; 
     @PositiveOrZero
     private double totalSpent;
     @PositiveOrZero
