@@ -7,7 +7,6 @@ import { Course } from '../../models/course.model';
 import { CartService } from '../../services/cart.service';
 import { CustomerService } from '../../services/customer.service';
 import { OrderService } from '../../services/order.service';
-
 @Component({
   selector: 'app-place-order',
   templateUrl: './place-order.component.html',
@@ -19,7 +18,6 @@ export class PlaceOrderComponent implements OnInit {
   errorMessage = '';
   loading = false;
   paymentDone = false;
-
   constructor(
     private fb: FormBuilder,
     private cartService: CartService,
@@ -36,9 +34,7 @@ export class PlaceOrderComponent implements OnInit {
       totalPrice: [{ value: 0, disabled: true }]
     });
   }
-
   get f() { return this.orderForm.controls; }
-
   ngOnInit(): void {
     this.cartService.getAllCoursesFromCart().subscribe({
       next: (cart) => {
@@ -56,7 +52,6 @@ export class PlaceOrderComponent implements OnInit {
       })
     });
   }
-
   makePayment(): void {
     if (this.orderForm.invalid || this.courses.length === 0 || this.loading) { return; }
     this.loading = true;
@@ -74,21 +69,25 @@ export class PlaceOrderComponent implements OnInit {
           error: () => { this.loading = false; this.showConfirmation(); }
         });
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.errorMessage = 'Payment could not be completed. Please try again.';
+        // 409 = the server refused because a course in the cart was already bought
+        this.errorMessage = err.status === 409
+          ? (err.error?.message || 'You are already enrolled in one of these courses.')
+          : 'Payment could not be completed. Please try again.';
       }
     });
   }
-
   private showConfirmation(): void {
     this.paymentDone = true;
     this.dialog.open(ConfirmDialogComponent, {
       disableClose: true,
-      data: { title: 'Payment was successful!', message: 'You are now enrolled. Find your courses under My Enrollments.', confirmText: 'OK', hideCancel: true, icon: 'check_circle' }
+      data: {
+        title: 'Payment was successful!', message: 'You are now enrolled. Find your courses under My Enrollments.', confirmText: 'OK', hideCancel: true,
+        icon: 'check_circle'
+      }
     }).afterClosed().subscribe(() => this.closeConfirmation());
   }
-
   closeConfirmation(): void {
     this.paymentDone = false;
     this.router.navigate(['/my-orders']);
