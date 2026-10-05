@@ -23,7 +23,7 @@ public class Customer {
     @NotBlank(message = "Information is required")
     @Size(max = 500, message = "Information is too long")
     private String information;
-
+ 
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;

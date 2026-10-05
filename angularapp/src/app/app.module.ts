@@ -3,27 +3,25 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared/shared.module';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { AuthService } from './services/auth.service';
-
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { HomeComponent } from './components/home/home.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ErrorComponent } from './components/error/error.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
-
+import { FooterComponent } from './components/footer/footer.component';
 /**
- * Only what every visitor needs is loaded up front: the navbar, home, dashboard, error page and the dialog.
- * Login, admin, customer and course-detail pages are lazy modules (see app-routing.module.ts).
- *
- * @author Team Lead
- */
+* Only what every visitor needs is loaded up front: the navbar, home, dashboard, error page and the dialog.
+* Login, admin, customer and course-detail pages are lazy modules (see app-routing.module.ts).
+*
+* @author Team Lead
+*/
 @NgModule({
-  declarations: [AppComponent, NavbarComponent, HomeComponent, DashboardComponent, ErrorComponent, ConfirmDialogComponent],
+  declarations: [AppComponent, NavbarComponent, HomeComponent, DashboardComponent, ErrorComponent, ConfirmDialogComponent, FooterComponent],
   imports: [BrowserModule, BrowserAnimationsModule, HttpClientModule, SharedModule, AppRoutingModule],
   providers: [
     // the token is added to API calls here and nowhere else (guideline 24)
@@ -38,4 +36,4 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule { }

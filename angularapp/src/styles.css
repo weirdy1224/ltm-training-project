@@ -421,3 +421,8 @@
   }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* image upload on the add / edit course forms (the preview above reuses .img-preview) */
+.upload { margin-bottom: 14px; }
+.upload .img-preview { margin-bottom: 12px; }
+.upload-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.upload-hint { color: var(--muted); font-size: 13px; }

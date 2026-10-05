@@ -15,7 +15,7 @@ public class AdminStatsDTO {
     @PositiveOrZero
     private long totalOrders;
     @PositiveOrZero
-    private double totalRevenue;
+    private double totalRevenue;  
     @PositiveOrZero
     private long totalReviews;
     /** Mean of all review ratings, one decimal; 0 when there are no reviews. */
@@ -47,5 +47,5 @@ public class AdminStatsDTO {
     public long getTotalReviews() { return totalReviews; }
     public void setTotalReviews(long totalReviews) { this.totalReviews = totalReviews; }
     public double getAverageRating() { return averageRating; }
-    public void setAverageRating(double averageRating) { this.averageRating = averageRating; }
+    public void setAverageRating(double averageRating) { this.averageRating = averageRating; }  
 }
