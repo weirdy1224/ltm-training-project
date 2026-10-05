@@ -1,0 +1,36 @@
+<footer class="foot" role="contentinfo">
+    <div class="foot-inner">
+        <div class="about">
+            <a class="brand" [routerLink]="role ? '/dashboard' : '/'"><mat-icon>school</mat-icon><span>Online E-Learning
+                    Platform</span></a>
+            <p>Learn at your own pace with courses, AI-powered search and real learner reviews.</p>
+        </div>
+        <nav class="col" aria-label="Quick links">
+            <h2>Quick links</h2>
+            <ng-container *ngIf="!role">
+                <a routerLink="/">Home</a>
+                <a routerLink="/registration">Register</a>
+                <a routerLink="/login">Login</a>
+            </ng-container>
+            <ng-container *ngIf="role === 'CUSTOMER'">
+                <a routerLink="/dashboard">Home</a>
+                <a routerLink="/customer-view-courses">Available Courses</a>
+                <a routerLink="/my-orders">My Enrollments</a>
+                <a routerLink="/my-cart">My Cart</a>
+            </ng-container>
+            <ng-container *ngIf="role === 'ADMIN'">
+                <a routerLink="/dashboard">Home</a>
+                <a routerLink="/view-courses">View Courses</a>
+                <a routerLink="/add-course">Add Course</a>
+                <a routerLink="/view-orders">View Enrollments</a>
+            </ng-container>
+        </nav>
+        <div class="col">
+            <h2>Why learn here</h2>
+            <span><mat-icon>menu_book</mat-icon>Wide range of courses</span>
+            <span><mat-icon>auto_awesome</mat-icon>AI course search</span>
+            <span><mat-icon>star</mat-icon>Real learner reviews</span>
+        </div>
+    </div>
+    <div class="legal">&copy; {{ year }} Online E-Learning Platform. All rights reserved.</div>
+</footer>

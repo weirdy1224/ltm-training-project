@@ -9,3 +9,9 @@
 .auth-form .form-card { width: 100%; }
 .alt { margin: 18px 0 0; text-align: center; color: var(--muted); font-size: 14px; }
 @media (max-width: 860px) { .auth { grid-template-columns: 1fr; } .auth-hero { padding: 32px 22px; } .auth-hero ul { display: none; } .auth-hero h1 { max-width: none; } }
+/* live password checklist */
+.pw-rules { display: grid; gap: 6px; margin: 2px 0 14px; padding: 12px 14px; list-style: none; border-radius: 10px; background: var(--surface-2); border: 1px
+    solid var(--line); }
+    .pw-rules li { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13.5px; }
+    .pw-rules li mat-icon { width: 18px; height: 18px; font-size: 18px; }
+    .pw-rules li.ok { color: var(--ok); }

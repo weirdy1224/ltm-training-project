@@ -1,0 +1,14 @@
+/* Footer (Midnight): sits a little darker than the page, with a gold hairline on top */
+.foot { margin-top: 48px; background: #0a101c; border-top: 1px solid rgba(245, 158, 11, .28); color: var(--muted); }
+.foot-inner { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 40px; max-width: 1200px; margin: 0 auto; padding: 40px 20px 28px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font: 800 17px var(--display); }
+.brand mat-icon { display: grid; place-items: center; width: 34px; height: 34px; font-size: 20px; border-radius: 9px; background: var(--gold); color: #1a1205; }
+.about p { margin: 14px 0 0; max-width: 40ch; line-height: 1.65; font-size: 14.5px; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+.col h2 { margin-bottom: 4px; font: 700 13px var(--display); letter-spacing: .06em; color: var(--gold-text); }
+.col a { color: var(--ink-2); text-decoration: none; font-weight: 500; font-size: 14.5px; width: fit-content; }
+.col a:hover { color: var(--gold-text); text-decoration: underline; text-underline-offset: 3px; }
+.col span { display: flex; align-items: center; gap: 8px; font-size: 14.5px; }
+.col span mat-icon { width: 18px; height: 18px; font-size: 18px; color: var(--gold); }
+.legal { max-width: 1200px; margin: 0 auto; padding: 18px 20px 26px; border-top: 1px solid var(--line); font-size: 13px; }
+@media (max-width: 760px) { .foot-inner { grid-template-columns: 1fr; gap: 28px; padding-top: 32px; } }
