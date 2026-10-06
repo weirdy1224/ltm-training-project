@@ -21,7 +21,8 @@ public class CrosConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(allowedOrigins)
+                // .allowedOrigins(allowedOrigins)
+                .allowedOriginPatterns(allowedOrigins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("Authorization", "Content-Type", "X-Admin-Code", "X-Request-Id")
                 .exposedHeaders("Retry-After", "X-Request-Id")
