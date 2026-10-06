@@ -53,3 +53,4 @@ export const ROLES = {
 /** Paths used by the AuthInterceptor to skip the Bearer header. */
 export const PUBLIC_API_PATTERN = /\/api\/(login|register|refresh|logout)$/;
 export const PAGE_SIZE = 9;
+
