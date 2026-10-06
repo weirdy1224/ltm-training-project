@@ -4,3 +4,11 @@
 .star { color: rgba(255,255,255,.22); }
 .star.on { color: #fbb92b; }
 .form-note.ok { background: rgba(52,211,153,.12); color: #34d399; }
+/* my reviews list (delete one of my own reviews) */
+.my-reviews { margin-top: 24px; }
+.my-reviews h2 { font-size: 22px; }
+.my-review { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+.my-review:first-of-type { border-top: 0; }
+.my-review-body { flex: 1; min-width: 0; }
+.my-review-body p { margin: 6px 0 4px; color: var(--ink-2); overflow-wrap: anywhere; }
+.my-review .del-review { flex: none; }
