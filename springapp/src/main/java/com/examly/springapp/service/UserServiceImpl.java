@@ -30,7 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
-    private static final String PASSWORD_POLICY = "^(?=.*[A-Za-z])(?=.*\\d).{8,72}$";
+    private static final String PASSWORD_POLICY =
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9\\s])\\S{8,72}$";
 
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
@@ -104,7 +105,9 @@ public class UserServiceImpl implements UserService {
     /** Shared by sign-up and admin creation: password policy, unique email, BCrypt, save. */
     private User create(User user, String role) {
         if (user.getPassword() == null || !user.getPassword().matches(PASSWORD_POLICY)) {
-            throw new InvalidRequestException("Password must be 8 to 72 characters and include a letter and a digit");
+            throw new InvalidRequestException(
+                "Password must be 8 to 72 characters and include an uppercase letter, lowercase letter, number and special character, with no spaces"
+            );
         }
         String email = user.getEmail().trim().toLowerCase(Locale.ROOT);
         if (DatabaseOperationException.guard("checking the email", () -> userRepo.existsByEmail(email))) {

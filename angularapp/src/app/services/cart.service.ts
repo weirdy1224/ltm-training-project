@@ -12,7 +12,7 @@ import { Review } from '../models/review.model';
  * @author Shoryan (cart), Sumit (reviews)
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root'          
 })
 export class CartService {
   public apiUrl = API_URL;

@@ -10,13 +10,13 @@ import { CourseSearchParams } from '../../models/search-params.model';
 import { AiService } from '../../services/ai.service';
 import { CartService } from '../../services/cart.service';
 import { CourseService } from '../../services/course.service';
-
+import { EnrollmentService } from '../../services/enrollment.service';
 /**
- * Course catalog for customers: keyword search, price filter, sorting, server-side paging,
- * and the AI (semantic) search box. Ratings come from the review summary API.
- *
- * @author Amogh (catalog, filters, pagination), Sumit (AI search)
- */
+* Course catalog for customers: keyword search, price filter, sorting, server-side paging,
+* and the AI (semantic) search box. Ratings come from the review summary API.
+*
+* @author Amogh (catalog, filters, pagination), Sumit (AI search)
+*/
 @Component({
   selector: 'app-customer-view-courses',
   templateUrl: './customer-view-courses.component.html',
@@ -26,34 +26,32 @@ export class CustomerViewCoursesComponent implements OnInit, OnDestroy {
   courses: Course[] = [];
   ratings: { [courseType: string]: CourseRating } = {};
   inCart = new Set<number>();
+  enrolled = new Set<number>(); // courses this customer already bought
   errorMessage = '';
   toastMessage = '';
   loaded = false;
-
   // filters (server-side)
   filters: CourseSearchParams = { keyword: '', minPrice: null, maxPrice: null, sort: 'newest', page: 0, size: PAGE_SIZE };
   totalElements = 0;
   pageSize = PAGE_SIZE;
   priceError = '';
-
   // AI search state
-  searchText = '';          // the one search box: used by Search (keyword) and AI Search
+  searchText = ''; // the one search box: used by Search (keyword) and AI Search
   aiActive = false;
   aiLoading = false;
   aiError = '';
   activeQuery = '';
-
   private sub?: Subscription;
-
   constructor(
     private route: ActivatedRoute,
     private courseService: CourseService,
     private cartService: CartService,
     private aiService: AiService,
-    private snack: MatSnackBar
-  ) {}
-
+    private snack: MatSnackBar,
+    private enrollment: EnrollmentService
+  ) { }
   ngOnInit(): void {
+    this.enrollment.enrolledCourseIds().subscribe(ids => (this.enrolled = ids));
     this.cartService.getReviewSummary().subscribe({
       next: (list) => (list || []).forEach(r => (this.ratings[r.courseType || ''] = r)),
       error: () => (this.ratings = {})
@@ -67,15 +65,12 @@ export class CustomerViewCoursesComponent implements OnInit, OnDestroy {
       this.load();
     });
   }
-
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
   }
-
   get hasFilters(): boolean {
     return !!(this.filters.keyword || this.filters.minPrice != null || this.filters.maxPrice != null);
   }
-
   load(): void {
     this.errorMessage = '';
     this.courseService.searchCourses(this.filters).subscribe({
@@ -87,13 +82,11 @@ export class CustomerViewCoursesComponent implements OnInit, OnDestroy {
       error: () => { this.errorMessage = 'Could not load courses.'; this.loaded = true; }
     });
   }
-
   /** Plain keyword search (the Search button or Enter in the search box). */
   keywordSearch(): void {
     this.filters.keyword = this.searchText.trim();
     this.applyFilters();
   }
-
   applyFilters(): void {
     const { minPrice, maxPrice } = this.filters;
     this.priceError = minPrice != null && maxPrice != null && minPrice > maxPrice ? 'Minimum price cannot be more than maximum price' : '';
@@ -102,7 +95,6 @@ export class CustomerViewCoursesComponent implements OnInit, OnDestroy {
     this.aiActive = false;
     this.load();
   }
-
   clearFilters(): void {
     this.filters = { keyword: '', minPrice: null, maxPrice: null, sort: 'newest', page: 0, size: PAGE_SIZE };
     this.searchText = '';
@@ -110,17 +102,14 @@ export class CustomerViewCoursesComponent implements OnInit, OnDestroy {
     this.priceError = '';
     this.load();
   }
-
   onPage(event: PageEvent): void {
     this.filters.page = event.pageIndex;
     this.load();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-
   ratingFor(course: Course): CourseRating | undefined {
     return this.ratings[course.courseType || ''];
   }
-
   aiSearch(): void {
     const query = this.searchText.trim();
     if (!query || this.aiLoading) { return; }
@@ -142,7 +131,6 @@ export class CustomerViewCoursesComponent implements OnInit, OnDestroy {
       }
     });
   }
-
   clearAiSearch(): void {
     this.searchText = this.filters.keyword || '';
     this.activeQuery = '';
@@ -150,8 +138,11 @@ export class CustomerViewCoursesComponent implements OnInit, OnDestroy {
     this.aiError = '';
     this.load();
   }
-
   addToCart(course: Course): void {
+    if (course.courseId != null && this.enrolled.has(course.courseId)) {
+      this.snack.open('You are already enrolled in this course', 'OK', { duration: 2500 });
+      return;
+    }
     this.cartService.addToCart(course).subscribe({
       next: () => {
         if (course.courseId != null) { this.inCart.add(course.courseId); }
