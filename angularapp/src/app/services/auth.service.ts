@@ -6,6 +6,7 @@ import { API,API_URL,STORAGE } from '../constant';
 import { Login } from '../models/login.model';
 import { User } from '../models/user.model';
 import { UserStoreService } from './user-store.service';
+import { environment } from 'src/environments/environment.prod';
 
 /**
  * Register, login, logout and session handling.
@@ -29,6 +30,21 @@ export class AuthService {
 
   constructor(private http: HttpClient, private userStore: UserStoreService) {
     this.userStore.restore();   // after a page reload, bring the user back from the saved token
+  }
+
+  googleLogin(credential: string): Observable<any> {
+
+    return this.http.post<any>(
+      `${environment.apiUrl}/api/google-login`,
+      {
+        credential
+      },
+      {
+        withCredentials: true
+      }
+    ).pipe(
+      tap((res: any) => this.applySession(res))
+    );
   }
 
   /** Public sign-up. The server always creates a CUSTOMER account. */
@@ -83,6 +99,7 @@ export class AuthService {
   }
 
   private applySession(res: any): void {
+    localStorage.setItem('username',res.username);
     localStorage.setItem(STORAGE.TOKEN, res.token);
     localStorage.setItem(STORAGE.ROLE, res.role);
     localStorage.setItem(STORAGE.USER_ID, String(res.userId));
