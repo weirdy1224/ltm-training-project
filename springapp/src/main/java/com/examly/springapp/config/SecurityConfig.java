@@ -106,7 +106,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers("/api/register", "/api/login", "/api/refresh",
-                                                                "/api/logout", "/api/health")
+                                                                "/api/logout", "/api/health", "/api/google-login")
                                                 .permitAll()
                                                 // API documentation (normally served by the swagger chain above; listed
                                                 // here
