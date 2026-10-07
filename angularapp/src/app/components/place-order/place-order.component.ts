@@ -1,107 +1,25 @@
-// import { Component, OnInit } from '@angular/core';
-// import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-// import { Router } from '@angular/router';
-// import { MatDialog } from '@angular/material/dialog';
-// import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
-// import { Course } from '../../models/course.model';
-// import { CartService } from '../../services/cart.service';
-// import { CustomerService } from '../../services/customer.service';
-// import { OrderService } from '../../services/order.service';
-// @Component({
-//   selector: 'app-place-order',
-//   templateUrl: './place-order.component.html',
-//   styleUrls: ['./place-order.component.css']
-// })
-// export class PlaceOrderComponent implements OnInit {
-//   orderForm: FormGroup;
-//   courses: Course[] = [];
-//   errorMessage = '';
-//   loading = false;
-//   paymentDone = false;
-//   constructor(
-//     private fb: FormBuilder,
-//     private cartService: CartService,
-//     private customerService: CustomerService,
-//     private orderService: OrderService,
-//     private router: Router,
-//     private dialog: MatDialog
-//   ) {
-//     this.orderForm = this.fb.group({
-//       name: ['', [Validators.required]],
-//       mobileNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-//       information: ['', [Validators.required]],
-//       email: ['', [Validators.required, Validators.email]],
-//       totalPrice: [{ value: 0, disabled: true }]
-//     });
-//   }
-//   get f() { return this.orderForm.controls; }
-//   ngOnInit(): void {
-//     this.cartService.getAllCoursesFromCart().subscribe({
-//       next: (cart) => {
-//         this.courses = cart.courses || [];
-//         this.orderForm.patchValue({ totalPrice: cart.totalAmount || 0 });
-//       },
-//       error: () => (this.errorMessage = 'Could not load your cart.')
-//     });
-//     this.customerService.viewCustomerByUserId().subscribe({
-//       next: (customer) => this.orderForm.patchValue({
-//         name: customer.customerName,
-//         information: customer.information,
-//         mobileNumber: customer.user?.mobileNumber,
-//         email: customer.user?.email
-//       })
-//     });
-//   }
-//   makePayment(): void {
-//     if (this.orderForm.invalid || this.courses.length === 0 || this.loading) { return; }
-//     this.loading = true;
-//     this.errorMessage = '';
-//     const order = {
-//       customer: { customerId: Number(localStorage.getItem('customerId')) },
-//       courses: this.courses.map(c => ({ courseId: c.courseId })),
-//       orderPrice: this.orderForm.getRawValue().totalPrice
-//     };
-//     this.orderService.addOrder(order).subscribe({
-//       next: () => {
-//         // the order is saved, so empty the cart before confirming
-//         this.cartService.removeAllCourses().subscribe({
-//           next: () => { this.loading = false; this.showConfirmation(); },
-//           error: () => { this.loading = false; this.showConfirmation(); }
-//         });
-//       },
-//       error: (err) => {
-//         this.loading = false;
-//         // 409 = the server refused because a course in the cart was already bought
-//         this.errorMessage = err.status === 409
-//           ? (err.error?.message || 'You are already enrolled in one of these courses.')
-//           : 'Payment could not be completed. Please try again.';
-//       }
-//     });
-//   }
-//   private showConfirmation(): void {
-//     this.paymentDone = true;
-//     this.dialog.open(ConfirmDialogComponent, {
-//       disableClose: true,
-//       data: {
-//         title: 'Payment was successful!', message: 'You are now enrolled. Find your courses under My Enrollments.', confirmText: 'OK', hideCancel: true,
-//         icon: 'check_circle'
-//       }
-//     }).afterClosed().subscribe(() => this.closeConfirmation());
-//   }
-//   closeConfirmation(): void {
-//     this.paymentDone = false;
-//     this.router.navigate(['/my-orders']);
-//   }
-// }
-       
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  Component,
+  OnInit,
+  NgZone
+} from '@angular/core';
+
+import {
+  FormBuilder,
+  FormGroup,
+  Validators
+} from '@angular/forms';
+
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
-import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import {
+  ConfirmDialogComponent
+} from '../confirm-dialog/confirm-dialog.component';
 
-import { Course } from '../../models/course.model';
+import {
+  Course
+} from '../../models/course.model';
 
 import { CartService } from '../../services/cart.service';
 import { CustomerService } from '../../services/customer.service';
@@ -134,7 +52,8 @@ export class PlaceOrderComponent implements OnInit {
     private orderService: OrderService,
     private paymentService: PaymentService,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private ngZone: NgZone
   ) {
 
     this.orderForm = this.fb.group({
@@ -271,9 +190,15 @@ export class PlaceOrderComponent implements OnInit {
 
             handler: (response: any) => {
 
-              this.verifyAndSave(
-                response
-              );
+              console.log('PAYMENT SUCCESS');
+
+              this.ngZone.run(() => {
+
+                this.verifyAndSave(
+                  response
+                );
+
+              });
             }
           };
 
@@ -299,6 +224,8 @@ export class PlaceOrderComponent implements OnInit {
     paymentResponse: any
   ): void {
 
+    console.log('VERIFY START');
+
     const payload = {
 
       razorpayOrderId:
@@ -316,6 +243,8 @@ export class PlaceOrderComponent implements OnInit {
       .subscribe({
 
         next: () => {
+
+          console.log('VERIFY SUCCESS');
 
           const order = {
 
@@ -346,6 +275,8 @@ export class PlaceOrderComponent implements OnInit {
 
         error: () => {
 
+          console.log('VERIFY FAILED');
+
           this.errorMessage =
             'Payment verification failed.';
         }
@@ -356,11 +287,15 @@ export class PlaceOrderComponent implements OnInit {
     order: any
   ): void {
 
+    console.log('SAVE ORDER START');
+
     this.orderService
       .addOrder(order)
       .subscribe({
 
         next: () => {
+
+          console.log('ORDER SAVED');
 
           this.cartService
             .removeAllCourses()
@@ -368,10 +303,14 @@ export class PlaceOrderComponent implements OnInit {
 
               next: () => {
 
+                console.log('CART CLEARED');
+
                 this.showConfirmation();
               },
 
               error: () => {
+
+                console.log('CART CLEAR FAILED');
 
                 this.showConfirmation();
               }
@@ -380,16 +319,22 @@ export class PlaceOrderComponent implements OnInit {
 
         error: (err) => {
 
+          console.log('ORDER SAVE FAILED');
+
           this.errorMessage =
             err.status === 409
-              ? (err.error?.message ||
-                  'You are already enrolled in one of these courses.')
+              ? (
+                  err.error?.message ||
+                  'You are already enrolled in one of these courses.'
+                )
               : 'Could not save order.';
         }
       });
   }
 
   private showConfirmation(): void {
+
+    console.log('SHOW CONFIRMATION');
 
     this.paymentDone = true;
 
