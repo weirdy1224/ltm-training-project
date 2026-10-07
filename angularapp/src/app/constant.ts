@@ -12,6 +12,8 @@ export const API = {
   LOGIN: '/api/login',
   REFRESH: '/api/refresh',
   LOGOUT: '/api/logout',
+  FORGOT_PASSWORD: '/api/forgot-password',
+  RESET_PASSWORD: '/api/reset-password',
   ADMIN_USERS: '/api/admin/users',
   // courses (Sivamuthu, Amogh)
   COURSE: '/api/course',
@@ -51,6 +53,6 @@ export const ROLES = {
   CUSTOMER: 'CUSTOMER'
 };
 /** Paths used by the AuthInterceptor to skip the Bearer header. */
-export const PUBLIC_API_PATTERN = /\/api\/(login|register|refresh|logout)$/;
+export const PUBLIC_API_PATTERN =
+  /\/api\/(login|register|refresh|logout|google-login|forgot-password|reset-password)$/;
 export const PAGE_SIZE = 9;
-

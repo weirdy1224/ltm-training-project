@@ -1,26 +1,192 @@
 <section class="hero">
-    <div class="hero-inner">
-      <h1>E-Learning Platform</h1>
-      <p class="intro">Welcome{{ name ? ', ' + name : '' }} to our E-Learning Platform, where knowledge meets innovation to create transformative learning experiences. Discover a wide range of courses designed to help you achieve your academic, professional, and personal goals.</p>
-      <div class="cta" *ngIf="role === 'CUSTOMER'"><a mat-flat-button color="primary" routerLink="/customer-view-courses">Browse courses</a><a mat-stroked-button class="ghost" routerLink="/customer-profile">My profile</a></div>
-      <div class="cta" *ngIf="role === 'ADMIN'"><a mat-flat-button color="primary" routerLink="/add-course">Add a course</a><a mat-stroked-button class="ghost" routerLink="/view-courses">View courses</a></div>
+
+  <div class="hero-inner">
+
+    <span class="hero-badge">
+      🚀 E-Learning Platform
+    </span>
+
+    <h1>
+      Welcome{{ name ? ', ' + name : '' }}
+    </h1>
+
+    <p class="intro">
+      Discover industry-ready courses, learn from expert content,
+      and take the next step in your career journey.
+    </p>
+
+    <div class="cta" *ngIf="role === 'CUSTOMER'">
+
+      <a mat-flat-button color="primary" routerLink="/customer-view-courses">
+
+        Browse Courses
+
+      </a>
+
+      <a mat-stroked-button class="ghost" routerLink="/customer-profile">
+
+        My Profile
+
+      </a>
+
     </div>
-  </section>
-  
-  <div class="page">
-    <div class="tiles" id="stats" *ngIf="customerStats">
-      <div class="tile"><mat-icon>school</mat-icon><strong>{{ customerStats.enrolledCourses || 0 }}</strong><span>Courses enrolled</span></div>
-      <div class="tile"><mat-icon>receipt_long</mat-icon><strong>{{ customerStats.ordersPlaced || 0 }}</strong><span>Orders placed</span></div>
-      <div class="tile"><mat-icon>shopping_cart</mat-icon><strong>{{ customerStats.cartItems || 0 }}</strong><span>In your cart</span></div>
-      <div class="tile"><mat-icon>payments</mat-icon><strong>{{ customerStats.totalSpent || 0 | currency:'INR':'symbol':'1.0-0' }}</strong><span>Total spent</span></div>
-      <div class="tile"><mat-icon>rate_review</mat-icon><strong>{{ customerStats.reviewsGiven || 0 }}</strong><span>Reviews given</span></div>
+
+    <div class="cta" *ngIf="role === 'ADMIN'">
+
+      <a mat-flat-button color="primary" routerLink="/add-course">
+
+        Add Course
+
+      </a>
+
+      <a mat-stroked-button class="ghost" routerLink="/view-courses">
+
+        View Courses
+
+      </a>
+
     </div>
-    <div class="tiles" id="stats" *ngIf="adminStats">
-      <div class="tile"><mat-icon>library_books</mat-icon><strong>{{ adminStats.totalCourses || 0 }}</strong><span>Courses</span></div>
-      <div class="tile"><mat-icon>group</mat-icon><strong>{{ adminStats.totalCustomers || 0 }}</strong><span>Customers</span></div>
-      <div class="tile"><mat-icon>receipt_long</mat-icon><strong>{{ adminStats.totalOrders || 0 }}</strong><span>Enrollments</span></div>
-      <div class="tile"><mat-icon>payments</mat-icon><strong>{{ adminStats.totalRevenue || 0 | currency:'INR':'symbol':'1.0-0' }}</strong><span>Revenue</span></div>
-      <div class="tile"><mat-icon>star</mat-icon><strong>{{ adminStats.averageRating || 0 | number:'1.1-1' }}</strong><span>Average rating ({{ adminStats.totalReviews || 0 }} reviews)</span></div>
-    </div>
-    <p class="muted" *ngIf="statsFailed">Your numbers could not be loaded right now.</p>
+
   </div>
+
+</section>
+
+<div class="page">
+
+  <!-- CUSTOMER DASHBOARD -->
+
+  <div class="tiles customer-tiles" *ngIf="customerStats">
+
+    <div class="tile">
+
+      <mat-icon>
+        school
+      </mat-icon>
+
+      <strong>
+        {{ customerStats.enrolledCourses || 0 }}
+      </strong>
+
+      <span>
+        Courses Enrolled
+      </span>
+
+    </div>
+
+    <div class="tile">
+
+      <mat-icon>
+        receipt_long
+      </mat-icon>
+
+      <strong>
+        {{ customerStats.ordersPlaced || 0 }}
+      </strong>
+
+      <span>
+        Orders Placed
+      </span>
+
+    </div>
+
+    <div class="tile">
+
+      <mat-icon>
+        shopping_cart
+      </mat-icon>
+
+      <strong>
+        {{ customerStats.cartItems || 0 }}
+      </strong>
+
+      <span>
+        Items In Cart
+      </span>
+
+    </div>
+
+  </div>
+
+  <!-- ADMIN DASHBOARD -->
+
+  <div class="tiles" *ngIf="adminStats">
+
+    <div class="tile">
+
+      <mat-icon>library_books</mat-icon>
+
+      <strong>
+        {{ adminStats.totalCourses || 0 }}
+      </strong>
+
+      <span>
+        Courses
+      </span>
+
+    </div>
+
+    <div class="tile">
+
+      <mat-icon>group</mat-icon>
+
+      <strong>
+        {{ adminStats.totalCustomers || 0 }}
+      </strong>
+
+      <span>
+        Customers
+      </span>
+
+    </div>
+
+    <div class="tile">
+
+      <mat-icon>receipt_long</mat-icon>
+
+      <strong>
+        {{ adminStats.totalOrders || 0 }}
+      </strong>
+
+      <span>
+        Enrollments
+      </span>
+
+    </div>
+
+    <div class="tile">
+
+      <mat-icon>payments</mat-icon>
+
+      <strong>
+        {{ adminStats.totalRevenue || 0 | currency:'INR':'symbol':'1.0-0' }}
+      </strong>
+
+      <span>
+        Revenue
+      </span>
+
+    </div>
+
+    <div class="tile">
+
+      <mat-icon>star</mat-icon>
+
+      <strong>
+        {{ adminStats.averageRating || 0 | number:'1.1-1' }}
+      </strong>
+
+      <span>
+        Average Rating ({{ adminStats.totalReviews || 0 }} Reviews)
+      </span>
+
+    </div>
+
+  </div>
+
+  <p class="muted" *ngIf="statsFailed">
+
+    Statistics could not be loaded right now.
+
+  </p>
+
+</div>
