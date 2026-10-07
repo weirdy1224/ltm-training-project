@@ -1,21 +1,10 @@
 package com.examly.springapp.controller;
 
-import com.examly.springapp.config.JwtUtil;
-import com.examly.springapp.config.LoginAttemptService;
-import com.examly.springapp.model.LoginDTO;
-import com.examly.springapp.model.User;
-import com.examly.springapp.service.RefreshTokenService;
-import com.examly.springapp.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +14,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.examly.springapp.config.JwtUtil;
+import com.examly.springapp.config.LoginAttemptService;
+import com.examly.springapp.model.LoginDTO;
+import com.examly.springapp.model.User;
+import com.examly.springapp.service.InstructorService;
+import com.examly.springapp.service.OtpService;
+import com.examly.springapp.service.RefreshTokenService;
+import com.examly.springapp.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 /**
  * Registration, login, token refresh and logout. The access token travels in the response body,
@@ -39,6 +48,13 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private static final String REFRESH_COOKIE = "refresh_token";
+
+    @Autowired(required = false)
+    private OtpService otpService;
+
+    /** Instructors may log in only after an administrator approved their application. */
+    @Autowired(required = false)
+    private InstructorService instructorService;
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
@@ -72,6 +88,9 @@ public class AuthController {
     public ResponseEntity<User> register(@Valid @RequestBody User user) {
         log.trace("register called");
         User saved = userService.register(user);
+        if (otpService != null) {
+            otpService.markPending(saved);
+        }
         log.info("Registration completed for user {}", saved.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -98,6 +117,12 @@ public class AuthController {
             throw e;
         }
         loginAttempts.recordSuccess(key);
+        if (otpService != null) {
+            otpService.requireVerified(user);   // 403 when the mobile number is not verified yet
+        }
+        if (instructorService != null) {
+            instructorService.requireCanLogin(user);   // 403 while an instructor application is pending or rejected
+        }
         log.info("Login successful for user {} with role {}", user.getUserId(), user.getRole());
         return session(user);
     }
@@ -115,6 +140,9 @@ public class AuthController {
             @CookieValue(name = REFRESH_COOKIE, required = false) String refreshToken) {
         log.trace("refresh called");
         User user = refreshTokenService.consume(refreshToken);
+        if (instructorService != null) {
+            instructorService.requireCanLogin(user);
+        }
         return session(user);
     }
 

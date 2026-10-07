@@ -14,6 +14,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ErrorComponent } from './components/error/error.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { FooterComponent } from './components/footer/footer.component';
+
 /**
 * Only what every visitor needs is loaded up front: the navbar, home, dashboard, error page and the dialog.
 * Login, admin, customer and course-detail pages are lazy modules (see app-routing.module.ts).

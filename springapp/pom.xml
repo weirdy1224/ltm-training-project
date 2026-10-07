@@ -9,14 +9,13 @@
         <version>3.2.5</version>
         <relativePath/>
     </parent>
-    <groupId>com.examly</groupId>
+    <groupId>com.examly</groupId> 
     <artifactId>springapp</artifactId>  
-    <version>0.0.1-SNAPSHOT</version>
-    <name>springapp</name>
+    <version>0.0.1-SNAPSHOT</version>    
+    <name>springapp</name>   
     <description>E-Learning Platform Backend</description>  
     <properties>
         <java.version>17</java.version>
-        <!-- one Swagger/OpenAPI version for the whole team; 2.5.x is the line built for Spring Boot 3.2 -->
         <springdoc.version>2.5.0</springdoc.version>
     </properties>
     <dependencies>
@@ -31,6 +30,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

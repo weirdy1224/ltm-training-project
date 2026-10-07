@@ -1,6 +1,6 @@
 # ==============================
 # Java / Spring Boot
-# ============================== 
+# ==============================
 
 # Compiled class files
 *.class
@@ -16,6 +16,11 @@ out/
 # Spring Boot logs
 *.log
 logs/
+
+# Spring Boot Configuration
+application.properties
+src/main/resources/application.properties
+springapp/src/main/resources/application.properties
 
 # ==============================
 # IDE
@@ -39,16 +44,13 @@ logs/
 # Node dependencies
 node_modules/
 
-
-node_modules/
-
-application.properties
-
 # Angular build output
 dist/
 .angular/
 tmp/
 out-tsc/
+
+# Package lock file
 package-lock.json
 
 # Angular cache
@@ -92,10 +94,9 @@ coverage/
 *.swp
 *.swo
 
-
-
+# ==============================
 # Maven
-
+# ==============================
 
 # Spring Boot tests
 springapp/src/test/

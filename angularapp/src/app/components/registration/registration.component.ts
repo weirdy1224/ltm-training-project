@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, FormGroupDirective, NgForm, ValidationErrors, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  AbstractControl, FormBuilder, FormGroup, FormGroupDirective, NgForm, ValidationErrors, Validators
+} from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { OtpService } from '../../services/otp.service';
 /** Username: no spaces anywhere. */
 function noSpaces(control: AbstractControl): ValidationErrors | null {
   return /\s/.test(control.value || '') ? { spaces: true } : null;
@@ -13,14 +16,15 @@ export const PASSWORD_RULES = [
   { key: 'upper', label: 'One upper case letter', test: (v: string) => /[A-Z]/.test(v) },
   { key: 'lower', label: 'One lower case letter', test: (v: string) => /[a-z]/.test(v) },
   { key: 'digit', label: 'One number', test: (v: string) => /[0-9]/.test(v) },
-  { key: 'special', label: 'One special character (for example @ # $ % !)', test: (v: string) => /[^A-Za-z0-9\s]/.test(v) },
+  { key: 'special', label: 'One special character (for example @ # $ % !)', test: (v: string) => /[^A-Zaz0-9\s]/.test(v) },
   { key: 'space', label: 'No spaces', test: (v: string) => v.length > 0 && !/\s/.test(v) }
 ];
 function strongPassword(control: AbstractControl): ValidationErrors | null {
   const v: string = control.value || '';
   return v && PASSWORD_RULES.some(r => !r.test(v)) ? { weak: true } : null;
 }
-/** Email: name, one @, then a domain with a dot followed by at least 2 letters (a@b.com works, a@b does not). */
+/** Email: name, one @, then a domain with a dot followed by at least 2 letters (a@b.com works, a@b does
+not). */
 const EMAIL_PATTERN = /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}$/;
 /** Mobile: 10 digits, the first one is 6, 7, 8 or 9. */
 const MOBILE_PATTERN = /^[6-9][0-9]{9}$/;
@@ -29,10 +33,12 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   const c = group.get('confirmPassword')?.value;
   return p && c && p !== c ? { mismatch: true } : null;
 }
-/** Shows the "Password do not match" error on the confirm field, even though the rule lives on the whole form. */
+/** Shows the "Password do not match" error on the confirm field, even though the rule lives on the whole
+form. */
 class ConfirmMatcher implements ErrorStateMatcher {
   isErrorState(control: AbstractControl | null, form: FormGroupDirective | NgForm | null): boolean {
-    return !!control && (control.touched || control.dirty) && (control.invalid || !!form?.form.hasError('mismatch'));
+    return !!control && (control.touched || control.dirty) && (control.invalid ||
+      !!form?.form.hasError('mismatch'));
   }
 }
 @Component({
@@ -40,14 +46,29 @@ class ConfirmMatcher implements ErrorStateMatcher {
   templateUrl: './registration.component.html',
   styleUrls: ['./registration.component.css']
 })
-export class RegistrationComponent {
+export class RegistrationComponent implements OnInit, OnDestroy {
   registerForm: FormGroup;
   errorMessage = '';
   loading = false;
   showPassword = false;
   passwordFocused = false;
   confirmMatcher = new ConfirmMatcher();
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
+  // ---- mobile OTP, shown inside this page (step 2) ----
+  /** null = not known yet, true = the server asks for OTP, false = OTP is switched off on the server. */
+  otpRequired: boolean | null = null;
+  step: 'form' | 'verify' | 'done' = 'form';
+  email = '';
+  maskedMobile = '';
+  code = '';
+  sending = false;
+  verifying = false;
+  otpError = '';
+  otpInfo = '';
+  devCode = '';
+  secondsLeft = 0;
+  private timer?: any;
+  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router, private otp:
+    OtpService) {
     this.registerForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3), noSpaces]],
       email: ['', [Validators.required, Validators.pattern(EMAIL_PATTERN)]],
@@ -57,6 +78,14 @@ export class RegistrationComponent {
       role: ['Customer'] // fixed: public sign-up always creates a customer
     }, { validators: passwordsMatch });
   }
+  ngOnInit(): void {
+    // only to show a short note and the step list; failing here changes nothing
+    this.otp.status().subscribe({
+      next: s => (this.otpRequired = !!s.required), error: () =>
+        (this.otpRequired = null)
+    });
+  }
+  ngOnDestroy(): void { clearInterval(this.timer); }
   get f() { return this.registerForm.controls; }
   /** Live checklist under the password field. */
   get passwordChecks() {
@@ -69,7 +98,7 @@ export class RegistrationComponent {
     this.errorMessage = '';
     const { confirmPassword, ...user } = this.registerForm.value;
     this.auth.register(user).subscribe({
-      next: () => { this.loading = false; this.router.navigate(['/login']); },
+      next: () => this.afterRegister(user.email, user.mobileNumber),
       error: (err) => {
         this.loading = false;
         if (err.status === 409) {
@@ -83,5 +112,68 @@ export class RegistrationComponent {
         }
       }
     });
+  }
+  /** Account created. If the server asks for OTP, stay on this page and show step 2; otherwise go to login
+  as before. */
+  private afterRegister(email: string, mobile: string): void {
+    this.otp.status().subscribe({
+      next: s => {
+        this.loading = false;
+        this.otpRequired = !!s.required;
+        if (!s.required) { this.router.navigate(['/login']); return; }
+        this.email = email;
+        this.maskedMobile = '******' + String(mobile).slice(-4);
+        this.step = 'verify';
+        this.sendCode();
+      },
+      error: () => { this.loading = false; this.router.navigate(['/login']); }
+    });
+  }
+  get canVerify(): boolean {
+    return /^[0-9]{6}$/.test(this.code) && !this.verifying;
+  }
+  onCodeInput(): void {
+    this.code = this.code.replace(/[^0-9]/g, '').slice(0, 6);
+  }
+  sendCode(): void {
+    if (this.sending || this.secondsLeft > 0) { return; }
+    this.sending = true;
+    this.otpError = '';
+    this.otp.send(this.email).subscribe({
+      next: r => {
+        this.sending = false;
+        this.otpInfo = r.message;
+        this.devCode = r.devCode || '';
+        this.startCountdown(r.resendInSeconds || 30);
+      },
+      error: err => {
+        this.sending = false;
+        this.otpError = [400, 429].includes(err.status) ? (err.error?.message || 'Could not send the code.')
+: 'The code could not be sent. Please try again in a moment.';
+        if (err.status === 429) { this.startCountdown(Number(err.headers?.get('Retry-After')) || 30); }
+      }
+    });
+  }
+  verify(): void {
+    if (!this.canVerify) { return; }
+    this.verifying = true;
+    this.otpError = '';
+    this.otp.verify(this.email, this.code).subscribe({
+      next: () => { this.verifying = false; clearInterval(this.timer); this.step = 'done'; },
+      error: err => {
+        this.verifying = false;
+        this.code = '';
+        this.otpError = [400, 429].includes(err.status) ? (err.error?.message || 'That code did not work.')
+          : 'Could not check the code. Please try again.';
+      }
+    });
+  }
+  private startCountdown(seconds: number): void {
+    clearInterval(this.timer);
+    this.secondsLeft = seconds;
+    this.timer = setInterval(() => {
+      this.secondsLeft = Math.max(0, this.secondsLeft - 1);
+      if (this.secondsLeft === 0) { clearInterval(this.timer); }
+    }, 1000);
   }
 }

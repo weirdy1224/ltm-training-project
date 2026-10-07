@@ -35,7 +35,11 @@ export const API = {
   REVIEW_BY_USER: '/api/review/user',
   REVIEW_BY_COURSE: '/api/review/course',
   REVIEW_SUMMARY: '/api/review/summary',
-  REVIEW_MY: '/api/review/my'
+  REVIEW_MY: '/api/review/my',
+  // mobile OTP (Day 1)
+  OTP_STATUS: '/api/otp/status',
+  OTP_SEND: '/api/otp/send',
+  OTP_VERIFY: '/api/otp/verify',
 };
 /** localStorage keys (the SRS keeps the JWT in localStorage). */
 export const STORAGE = {
