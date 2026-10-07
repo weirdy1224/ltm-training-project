@@ -3,9 +3,14 @@ package com.examly.springapp.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Shapes of the earnings, payout and invoice APIs. Money is always a number of paise (100 paise = 1 rupee). */
+/**
+ * Shapes of the earnings, payout and invoice APIs. Money is always a number of
+ * paise (100 paise = 1
+ * rupee).
+ */
 public final class PayDtos {
-    private PayDtos() {}
+    private PayDtos() {
+    }
 
     public static class EarningRow {
         public Long id;
