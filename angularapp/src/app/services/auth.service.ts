@@ -58,6 +58,27 @@ export class AuthService {
     );
   }
 
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}${API.FORGOT_PASSWORD}`,
+      { email }
+    );
+  }
+
+  resetPassword(
+    token: string,
+    password: string
+  ): Observable<any> {
+  
+    return this.http.post<any>(
+      `${this.apiUrl}${API.RESET_PASSWORD}`,
+      {
+        token,
+        password
+      }
+    );
+  }
+
   /** Gets a new token using the refresh cookie. Concurrent callers share one request. */
   refresh(): Observable<any> {
     if (!this.refreshInFlight$) {

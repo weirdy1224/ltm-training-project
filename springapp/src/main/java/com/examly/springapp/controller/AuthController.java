@@ -28,6 +28,9 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
+import com.examly.springapp.dto.ForgotPasswordRequest;
+import com.examly.springapp.dto.ResetPasswordRequest;
+import com.examly.springapp.service.PasswordResetService;
 
 /**
  * Registration, login, token refresh and logout. The access token travels in
@@ -51,13 +54,19 @@ public class AuthController {
         private final boolean secureCookie;
         private final long refreshDays;
         private final GoogleAuthService authService;
+        private final PasswordResetService passwordResetService;
 
         @Autowired
-        public AuthController(UserService userService, JwtUtil jwtUtil, RefreshTokenService refreshTokenService,
+        public AuthController(
+                        UserService userService,
+                        JwtUtil jwtUtil,
+                        RefreshTokenService refreshTokenService,
                         LoginAttemptService loginAttempts,
                         @Value("${app.cookie.secure:false}") boolean secureCookie,
                         @Value("${jwt.refresh-expiration-days:7}") long refreshDays,
-                        GoogleAuthService googleAuthService) {
+                        GoogleAuthService googleAuthService,
+                        PasswordResetService passwordResetService) {
+
                 this.userService = userService;
                 this.jwtUtil = jwtUtil;
                 this.refreshTokenService = refreshTokenService;
@@ -65,6 +74,7 @@ public class AuthController {
                 this.secureCookie = secureCookie;
                 this.refreshDays = refreshDays;
                 this.authService = googleAuthService;
+                this.passwordResetService = passwordResetService;
         }
 
         @Operation(summary = "Register a new customer", description = "Public. Always creates a CUSTOMER. Admin accounts are created by the seeded admin through /api/admin/users.")
@@ -77,16 +87,15 @@ public class AuthController {
 
         @PostMapping("/google-login")
         public ResponseEntity<Map<String, Object>> googleLogin(
-                @RequestBody GoogleLoginRequest request)
-                throws Exception {
-        
-            System.out.println("GOOGLE LOGIN ENDPOINT HIT");
-        
-            User user =
-                    authService.googleLogin(
-                            request.getCredential());
-        
-            return session(user);
+                        @RequestBody GoogleLoginRequest request)
+                        throws Exception {
+
+                System.out.println("GOOGLE LOGIN ENDPOINT HIT");
+
+                User user = authService.googleLogin(
+                                request.getCredential());
+
+                return session(user);
         }
 
         @PostMapping("/register")
@@ -153,6 +162,32 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT)
                                 .header(HttpHeaders.SET_COOKIE, cookie("", Duration.ZERO).toString())
                                 .build();
+        }
+
+        @PostMapping("/forgot-password")
+        public ResponseEntity<Map<String, String>> forgotPassword(
+                        @Valid @RequestBody ForgotPasswordRequest request) {
+
+                passwordResetService.requestReset(request.getEmail());
+
+                return ResponseEntity.ok(
+                                Map.of(
+                                                "message",
+                                                "If an account exists for that email, a password reset link has been sent."));
+        }
+
+        @PostMapping("/reset-password")
+        public ResponseEntity<Map<String, String>> resetPassword(
+                        @Valid @RequestBody ResetPasswordRequest request) {
+
+                passwordResetService.resetPassword(
+                                request.getToken(),
+                                request.getPassword());
+
+                return ResponseEntity.ok(
+                                Map.of(
+                                                "message",
+                                                "Password reset successfully"));
         }
 
         /**
