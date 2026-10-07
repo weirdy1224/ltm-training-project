@@ -46,7 +46,7 @@
           <input matInput id="adminPassword" type="password" formControlName="password" autocomplete="new-password" />
           <mat-hint>At least 8 characters, with a letter and a digit</mat-hint>
           <mat-error *ngIf="f['password'].errors?.['required']">Password is required</mat-error>
-          <mat-error *ngIf="f['password'].errors?.['pattern']">Password needs at least 8 characters with a letter and a digit</mat-error>
+          <mat-error *ngIf="f['password'].errors?.['pattern']">Use 8-72 characters with upper and lower case letters, a digit and a symbol, no spaces</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Confirm Password</mat-label>

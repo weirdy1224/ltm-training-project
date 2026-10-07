@@ -3,6 +3,7 @@
     <button mat-button class="back" (click)="back()"><mat-icon>arrow_back</mat-icon>All courses</button>
     <h1 id="courseTitle">{{ course.courseType }}</h1>
     <p class="lead">{{ course.courseDetails }}</p>
+    <p class="lead" *ngIf="course.instructorName">Created by {{ course.instructorName }}</p>
     <app-star-rating [value]="average" [count]="reviews.length"></app-star-rating>
   </div>
 </div>
@@ -23,6 +24,17 @@
         <li><mat-icon>workspace_premium</mat-icon>Skills you can use at work and in studies</li>
         <li><mat-icon>event_available</mat-icon>Enroll once, access from your enrollments</li>
       </ul>
+    </section>
+    <section class="block" id="lessons">
+      <h2>Video lessons</h2>
+      <div class="empty small" *ngIf="lessons.length === 0"><p>No video lessons have been added yet.</p></div>
+      <ol class="points" *ngIf="lessons.length > 0">
+        <li *ngFor="let l of lessons">
+          <mat-icon>{{ l.canWatch ? 'play_circle_outline' : 'lock' }}</mat-icon>
+          <a *ngIf="l.canWatch" [routerLink]="['/watch-course', course.courseId]" [queryParams]="{ video: l.videoId }">{{ l.orderIndex }}. {{ l.title }}</a>
+          <span *ngIf="!l.canWatch">{{ l.orderIndex }}. {{ l.title }} (enroll to watch)</span>
+        </li>
+      </ol>
     </section>
     <section class="block" id="reviews">
       <h2>Learner reviews</h2>
@@ -58,7 +70,7 @@
           <div><strong>You are enrolled</strong><span>This course is in your enrollments.</span></div>
         </div>
         <a mat-flat-button color="primary" class="wide" id="goToCourse"
-          routerLink="/my-orders"><mat-icon>play_circle</mat-icon>Go to my course</a>
+          [routerLink]="['/watch-course', course.courseId]"><mat-icon>play_circle</mat-icon>Watch course</a>
         <a mat-stroked-button color="primary" class="wide" id="writeReview"
           routerLink="/add-review"><mat-icon>rate_review</mat-icon>Write a review</a>
       </div>
@@ -69,9 +81,16 @@
           (click)="addToCart()"><mat-icon>add_shopping_cart</mat-icon>Add to
           Cart</button>
       </ng-container>
-      <a mat-stroked-button color="primary" class="wide" *ngIf="role === 'ADMIN'"
-        [routerLink]="['/edit-course', course.courseId]"><mat-icon>edit</mat-icon>Edit
-        course</a>
+      <a mat-flat-button color="primary" class="wide" *ngIf="canManage && canWatchAny"
+        [routerLink]="['/watch-course', course.courseId]"><mat-icon>play_circle</mat-icon>Watch lessons</a>
+      <ng-container *ngIf="role === 'ADMIN'">
+        <a mat-stroked-button color="primary" class="wide" [routerLink]="['/edit-course', course.courseId]"><mat-icon>edit</mat-icon>Edit course</a>
+        <a mat-stroked-button color="primary" class="wide" [routerLink]="['/manage-videos', course.courseId]"><mat-icon>video_library</mat-icon>Manage videos</a>
+      </ng-container>
+      <ng-container *ngIf="isInstructor && course.instructorId === myUserId">
+        <a mat-stroked-button color="primary" class="wide" [routerLink]="['/instructor/edit-course', course.courseId]"><mat-icon>edit</mat-icon>Edit course</a>
+        <a mat-stroked-button color="primary" class="wide" [routerLink]="['/instructor/videos', course.courseId]"><mat-icon>video_library</mat-icon>Manage videos</a>
+      </ng-container>
     </div>
   </aside>
 </div>

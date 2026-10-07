@@ -1,10 +1,13 @@
 package com.examly.springapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 /**
- * A course that customers can browse, search, add to the cart and buy.
+ * A course that customers can browse, search, add to the cart and buy. A course created by an instructor remembers
+ * its owner; courses created by an admin have no instructor.
  *
  * @author Sivamuthu
  */
@@ -31,6 +34,12 @@ public class Course {
     @NotNull(message = "Course price is required")
     @PositiveOrZero(message = "Course price cannot be negative")
     private Double coursePrice;
+
+    /** The instructor who owns the course (null for admin-created courses). Never sent to the browser as an object: it holds an email address. */
+    @ManyToOne
+    @JoinColumn(name = "instructor_id")
+    @JsonIgnore
+    private User instructor;
 
     /** No-arg constructor required by JPA and Jackson. */
     public Course() {}
@@ -60,4 +69,14 @@ public class Course {
     public void setCourseDetails(String courseDetails) { this.courseDetails = courseDetails; }
     public Double getCoursePrice() { return coursePrice; }
     public void setCoursePrice(Double coursePrice) { this.coursePrice = coursePrice; }
+    public User getInstructor() { return instructor; }
+    public void setInstructor(User instructor) { this.instructor = instructor; }
+
+    /** Sent to the browser instead of the whole instructor; read-only, so a request body cannot set it. */
+    @JsonProperty(value = "instructorId", access = JsonProperty.Access.READ_ONLY)
+    public Long getInstructorId() { return instructor == null ? null : instructor.getUserId(); }
+
+    /** The display name shown on the course page; read-only. */
+    @JsonProperty(value = "instructorName", access = JsonProperty.Access.READ_ONLY)
+    public String getInstructorName() { return instructor == null ? null : instructor.getUsername(); }
 }

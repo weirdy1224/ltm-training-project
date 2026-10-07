@@ -22,7 +22,7 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  * <ol>
  * <li>Swagger/OpenAPI documentation paths (public, with a relaxed
  * Content-Security-Policy so the UI can load)</li>
- * <li>The API itself (JWT, roles, strict "default-src 'none'" policy)</li>
+ * <li>The API itself (JWT, roles ADMIN / INSTRUCTOR / CUSTOMER, strict "default-src 'none'" policy)</li>
  * </ol>
  * In the API chain the ORDER of the requestMatchers matters: the first match
  * wins, so specific rules come first.
@@ -105,9 +105,23 @@ public class SecurityConfig {
                                                 handlers))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                                .requestMatchers("/api/register", "/api/login", "/api/refresh",
-                                                                "/api/logout", "/api/health")
+                                                .requestMatchers(
+                                                        "/api/register",
+                                                        "/api/login",
+                                                        "/api/refresh",
+                                                        "/api/logout",
+                                                        "/api/health",
+                                                        "/api/google-login",
+                                                        "/api/forgot-password",
+                                                        "/api/reset-password",
+                                                        "/api/verify-otp",
+                                                        "/api/resend-otp",
+                                                        "/api/instructor-application/status"
+                                                )
                                                 .permitAll()
+                                                // a <video> tag cannot send the Authorization header, so streaming is protected by
+                                                // the signed, short-lived token in the URL (checked in VideoController)
+                                                .requestMatchers(HttpMethod.GET, "/api/video/*/stream").permitAll()
                                                 // API documentation (normally served by the swagger chain above; listed
                                                 // here
                                                 // too so it is never blocked)
@@ -118,9 +132,9 @@ public class SecurityConfig {
                                                 // uploaded course images are public so the browser can show them in an
                                                 // <img> tag (read only)
                                                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
-                                                // course image upload: admin only
+                                                // course image upload: admin and instructors
                                                 .requestMatchers(HttpMethod.POST, "/api/upload/**")
-                                                .hasAuthority("ADMIN")
+                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR")
                                                 // admin management: only an existing admin can list, add or remove
                                                 // admins
                                                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
@@ -131,11 +145,28 @@ public class SecurityConfig {
                                                 // courses ("/api/course/search" is listed first for clarity; the
                                                 // general GET
                                                 // rule below also covers it)
+                                                // an instructor's own courses (must stay above the general GET rule)
+                                                .requestMatchers(HttpMethod.GET, "/api/course/mine")
+                                                .hasAuthority("INSTRUCTOR")
                                                 .requestMatchers(HttpMethod.GET, "/api/course/search")
-                                                .hasAnyAuthority("ADMIN", "CUSTOMER")
+                                                .hasAnyAuthority("ADMIN", "CUSTOMER", "INSTRUCTOR")
                                                 .requestMatchers(HttpMethod.GET, "/api/course", "/api/course/**")
-                                                .hasAnyAuthority("ADMIN", "CUSTOMER")
-                                                .requestMatchers("/api/course", "/api/course/**").hasAuthority("ADMIN")
+                                                .hasAnyAuthority("ADMIN", "CUSTOMER", "INSTRUCTOR")
+                                                // add / edit / delete: admin, or an instructor (ownership is checked again in the controller)
+                                                .requestMatchers("/api/course", "/api/course/**")
+                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR")
+                                                // video lessons: managing needs admin or instructor (ownership checked in the service);
+                                                // watching also needs the course to be bought, which the service checks too
+                                                .requestMatchers(HttpMethod.POST, "/api/video/course/*")
+                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR")
+                                                .requestMatchers(HttpMethod.PUT, "/api/video/*")
+                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/video/*")
+                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR")
+                                                .requestMatchers(HttpMethod.GET, "/api/video/course/*")
+                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR", "CUSTOMER")
+                                                .requestMatchers(HttpMethod.POST, "/api/video/*/stream-token")
+                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR", "CUSTOMER")
                                                 // customers (ownership is checked again inside the controller)
                                                 .requestMatchers(HttpMethod.POST, "/api/customer")
                                                 .hasAuthority("CUSTOMER")
@@ -145,6 +176,9 @@ public class SecurityConfig {
                                                 .hasAuthority("CUSTOMER")
                                                 .requestMatchers(HttpMethod.GET, "/api/customer/**")
                                                 .hasAuthority("ADMIN")
+                                                // payment
+                                                .requestMatchers("/api/payment/**")
+                                                .hasAuthority("CUSTOMER")
                                                 // orders
                                                 .requestMatchers(HttpMethod.POST, "/api/order").hasAuthority("CUSTOMER")
                                                 .requestMatchers(HttpMethod.GET, "/api/order").hasAuthority("ADMIN")
@@ -161,7 +195,7 @@ public class SecurityConfig {
                                                 .hasAuthority("CUSTOMER")
                                                 .requestMatchers(HttpMethod.GET, "/api/review/summary",
                                                                 "/api/review/course/**")
-                                                .hasAnyAuthority("ADMIN", "CUSTOMER")
+                                                .hasAnyAuthority("ADMIN", "CUSTOMER", "INSTRUCTOR")
                                                 .requestMatchers(HttpMethod.GET, "/api/review", "/api/review/**")
                                                 .hasAnyAuthority("ADMIN", "CUSTOMER")
                                                 // a customer may delete only their own review (ownership is checked in
@@ -178,6 +212,8 @@ public class SecurityConfig {
                                                 .hasAuthority("ADMIN")
                                                 .requestMatchers(HttpMethod.GET, "/api/dashboard/customer/**")
                                                 .hasAuthority("CUSTOMER")
+                                                .requestMatchers(HttpMethod.GET, "/api/dashboard/instructor")
+                                                .hasAuthority("INSTRUCTOR")
                                                 // carts
                                                 .requestMatchers(HttpMethod.GET, "/api/cart").hasAuthority("ADMIN")
                                                 .requestMatchers("/api/cart", "/api/cart/**").hasAuthority("CUSTOMER")

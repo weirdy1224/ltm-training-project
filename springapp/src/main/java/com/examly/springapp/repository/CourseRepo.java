@@ -1,6 +1,7 @@
 package com.examly.springapp.repository;
 
 import com.examly.springapp.model.Course;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,6 +35,9 @@ public interface CourseRepo extends JpaRepository<Course, Long> {
                         @Param("minPrice") Double minPrice,
                         @Param("maxPrice") Double maxPrice,
                         Pageable pageable);
+
+        /** The courses owned by one instructor, newest first. */
+        List<Course> findByInstructor_UserIdOrderByCourseIdDesc(Long userId);
 
         /** True when some course still has this type (ignoring case). */
         boolean existsByCourseTypeIgnoreCase(String courseType);

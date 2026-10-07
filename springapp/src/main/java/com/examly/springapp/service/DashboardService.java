@@ -1,6 +1,7 @@
 package com.examly.springapp.service;
 
 import com.examly.springapp.dto.AdminStatsDTO;
+import com.examly.springapp.dto.InstructorStatsDTO;
 import com.examly.springapp.dto.CustomerStatsDTO;
 
 /**
@@ -14,4 +15,7 @@ public interface DashboardService {
 
     /** Platform-wide numbers for the admin dashboard. */
     AdminStatsDTO getAdminStats();
+
+    /** Numbers for one instructor's dashboard: only courses that instructor owns are counted. */
+    InstructorStatsDTO getInstructorStats(Long instructorUserId);
 }
