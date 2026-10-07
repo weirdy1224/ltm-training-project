@@ -43,12 +43,11 @@ public class GeminiService {
         this.generationModel = generationModel;
     }
 
-    /** True only when a non-empty gemini.api.key is configured. */
+    
     public boolean isEnabled() {
         return !apiKey.isEmpty();
     }
 
-    /** Returns the embedding vector for the text, or null when Gemini is not enabled. */
     public float[] embed(String text) {
         if (!isEnabled()) return null;
         try {
@@ -69,7 +68,6 @@ public class GeminiService {
         }
     }
 
-    /** Returns Gemini-generated text, or null when Gemini is not enabled. */
     public String generate(String prompt) {
         if (!isEnabled()) return null;
         try {
@@ -84,7 +82,6 @@ public class GeminiService {
         }
     }
 
-    /** Caps how many Gemini calls the whole app makes per day, whatever the users do. */
     private void consumeBudget() {
         LocalDate today = LocalDate.now();
         if (!today.equals(budgetDay)) {

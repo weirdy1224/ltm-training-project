@@ -96,6 +96,14 @@
 
         </mat-form-field>
 
+        <div class="forgot-password">
+
+          <a routerLink="/forgot-password">
+            Forgot password?
+          </a>
+        
+        </div>
+
         <div
           class="form-error"
           *ngIf="errorMessage">
@@ -114,6 +122,15 @@
           {{loading ? 'Signing In...' : 'Sign In'}}
 
         </button>
+
+        <div class="divider">
+          <span>OR</span>
+        </div>
+        
+        <div
+          id="googleButton"
+          class="google-login">
+        </div>
 
       </form>
 

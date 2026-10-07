@@ -20,7 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * AI course search (semantic with Gemini, lexical fallback). Limited per user so nobody can burn the AI quota.
+ * AI course search (semantic with Gemini, lexical fallback). Limited per user
+ * so nobody can burn the AI quota.
  *
  * @author Sumit
  */
@@ -37,15 +38,14 @@ public class CourseAiController {
 
     @Autowired
     public CourseAiController(CourseAiService courseAiService, AiUsageLimiter limiter, AccessService access,
-                              @Value("${ai.max-query-length:200}") int maxQueryLength) {
+            @Value("${ai.max-query-length:200}") int maxQueryLength) {
         this.courseAiService = courseAiService;
         this.limiter = limiter;
         this.access = access;
         this.maxQueryLength = maxQueryLength;
     }
 
-    @Operation(summary = "Search courses with natural language",
-            description = "CUSTOMER only. Body: {\"query\": \"...\"}. A blank query returns all courses without using the AI quota.")
+    @Operation(summary = "Search courses with natural language", description = "CUSTOMER only. Body: {\"query\": \"...\"}. A blank query returns all courses without using the AI quota.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Courses ordered by relevance"),
             @ApiResponse(responseCode = "400", description = "Search text too long"),
@@ -64,7 +64,8 @@ public class CourseAiController {
         if (query != null) {
             query = query.replaceAll("\\p{Cntrl}", " ").trim();
         }
-        // blank queries return the plain list without calling the AI, so they do not use up the quota
+        // blank queries return the plain list without calling the AI, so they do not
+        // use up the quota
         if (query != null && !query.isEmpty()) {
             limiter.check(access.currentEmail());
         }
