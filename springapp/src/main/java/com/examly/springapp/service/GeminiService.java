@@ -16,7 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * Thin client for the Gemini embedding and generation API with a daily call budget.
+ * Thin client for the Gemini embedding and generation API with a daily call
+ * budget.
  *
  * @author Sumit
  */
@@ -34,9 +35,9 @@ public class GeminiService {
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
     public GeminiService(@Value("${gemini.api.key:}") String apiKey,
-                         @Value("${gemini.embedding.model:text-embedding-004}") String embeddingModel,
-                         @Value("${gemini.generation.model:gemini-2.5-flash}") String generationModel,
-                         @Value("${ai.daily-embedding-budget:2000}") int dailyBudget) {
+            @Value("${gemini.embedding.model:text-embedding-004}") String embeddingModel,
+            @Value("${gemini.generation.model:gemini-3.8-flash}") String generationModel,
+            @Value("${ai.daily-embedding-budget:2000}") int dailyBudget) {
         this.dailyBudget = dailyBudget;
         this.apiKey = apiKey == null ? "" : apiKey.trim();
         this.embeddingModel = embeddingModel;
@@ -48,9 +49,13 @@ public class GeminiService {
         return !apiKey.isEmpty();
     }
 
-    /** Returns the embedding vector for the text, or null when Gemini is not enabled. */
+    /**
+     * Returns the embedding vector for the text, or null when Gemini is not
+     * enabled.
+     */
     public float[] embed(String text) {
-        if (!isEnabled()) return null;
+        if (!isEnabled())
+            return null;
         try {
             String body = mapper.writeValueAsString(Map.of(
                     "content", Map.of("parts", List.of(Map.of("text", text)))));
@@ -60,7 +65,8 @@ public class GeminiService {
                 throw new ApiCommunicationException("Gemini returned no embedding", null);
             }
             float[] vec = new float[values.size()];
-            for (int i = 0; i < vec.length; i++) vec[i] = (float) values.get(i).asDouble();
+            for (int i = 0; i < vec.length; i++)
+                vec[i] = (float) values.get(i).asDouble();
             return vec;
         } catch (ApiCommunicationException e) {
             throw e;
@@ -71,7 +77,8 @@ public class GeminiService {
 
     /** Returns Gemini-generated text, or null when Gemini is not enabled. */
     public String generate(String prompt) {
-        if (!isEnabled()) return null;
+        if (!isEnabled())
+            return null;
         try {
             String body = mapper.writeValueAsString(Map.of(
                     "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt))))));
@@ -84,7 +91,10 @@ public class GeminiService {
         }
     }
 
-    /** Caps how many Gemini calls the whole app makes per day, whatever the users do. */
+    /**
+     * Caps how many Gemini calls the whole app makes per day, whatever the users
+     * do.
+     */
     private void consumeBudget() {
         LocalDate today = LocalDate.now();
         if (!today.equals(budgetDay)) {
@@ -109,8 +119,14 @@ public class GeminiService {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
         HttpResponse<String> res = http.send(req, HttpResponse.BodyHandlers.ofString());
+        System.out.println("Status = " + res.statusCode());
+        System.out.println("Body = " + res.body());
         if (res.statusCode() / 100 != 2) {
-            throw new ApiCommunicationException("Gemini API responded with status " + res.statusCode(), null);
+
+            throw new ApiCommunicationException(
+                    "Gemini API responded with status "
+                            + res.statusCode(),
+                    null);
         }
         return mapper.readTree(res.body());
     }
