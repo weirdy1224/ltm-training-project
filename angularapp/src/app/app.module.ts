@@ -14,6 +14,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ErrorComponent } from './components/error/error.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { AiModule } from './modules/ai/ai.module';
 
 /**
 * Only what every visitor needs is loaded up front: the navbar, home, dashboard, error page and the dialog.
@@ -23,7 +24,7 @@ import { FooterComponent } from './components/footer/footer.component';
 */
 @NgModule({
   declarations: [AppComponent, NavbarComponent, HomeComponent, DashboardComponent, ErrorComponent, ConfirmDialogComponent, FooterComponent],
-  imports: [BrowserModule, BrowserAnimationsModule, HttpClientModule, SharedModule, AppRoutingModule],
+  imports: [BrowserModule, BrowserAnimationsModule, HttpClientModule, SharedModule, AiModule,AppRoutingModule],
   providers: [
     // the token is added to API calls here and nowhere else (guideline 24)
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

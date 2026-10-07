@@ -138,6 +138,8 @@ public class SecurityConfig {
                                                 // admin management: only an existing admin can list, add or remove
                                                 // admins
                                                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                                                // AI quiz and chatbot: logged-in customers only
+                                                .requestMatchers("/api/ai/**").hasAuthority("CUSTOMER")
                                                 // AI search: logged-in customers only (usage is limited per user)
                                                 .requestMatchers("/api/course-ai/search").hasAuthority("CUSTOMER")
                                                 // courses ("/api/course/search" is listed first for clarity; the
