@@ -9,7 +9,8 @@ import { ROLES } from './constant';
 
 const ADMIN = { roles: [ROLES.ADMIN] };
 const CUSTOMER = { roles: [ROLES.CUSTOMER] };
-const ANY = { roles: [ROLES.ADMIN, ROLES.CUSTOMER] };
+const INSTRUCTOR = { roles: [ROLES.INSTRUCTOR] };
+const ANY = { roles: [ROLES.ADMIN, ROLES.INSTRUCTOR, ROLES.CUSTOMER] };
 
 /**
  * The home page is the first page. Feature areas are lazy loaded (their code is downloaded only when needed)
@@ -25,6 +26,8 @@ const routes: Routes = [
 
   // admin pages
   { path: '', canActivate: [AuthGuard], data: ADMIN, loadChildren: () => import('./modules/admin/admin.module').then(m => m.AdminModule) },
+  // instructor pages (own courses, lessons, statistics)
+  { path: 'instructor', canActivate: [AuthGuard], data: INSTRUCTOR, loadChildren: () => import('./modules/instructor/instructor.module').then(m => m.InstructorModule) },
   // customer pages
   { path: '', canActivate: [AuthGuard], data: CUSTOMER, loadChildren: () => import('./modules/customer/customer.module').then(m => m.CustomerModule) },
   // pages for both roles

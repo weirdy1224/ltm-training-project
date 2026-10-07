@@ -64,7 +64,7 @@ public class CourseAiController {
         if (query != null) {
             query = query.replaceAll("\\p{Cntrl}", " ").trim();
         }
-        // blank queries return the plain list without calling the AI, so they do not use up the quota
+        // blank queries return the plain list without calling the AI, so they do not use up the quota 
         if (query != null && !query.isEmpty()) {
             limiter.check(access.currentEmail());
         }

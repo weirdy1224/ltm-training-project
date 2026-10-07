@@ -35,6 +35,11 @@ export class CourseService {
     return this.http.delete<void>(`${this.apiUrl}${API.COURSE}/${courseId}`);
   }
 
+  /** The courses owned by the logged-in instructor. */
+  myCourses(): Observable<Course[]> {
+    return this.http.get<Course[]>(`${this.apiUrl}${API.COURSE_MINE}`);
+  }
+
   getCourseById(courseId: string): Observable<Course> {
     return this.http.get<Course>(`${this.apiUrl}${API.COURSE}/${courseId}`);
   }

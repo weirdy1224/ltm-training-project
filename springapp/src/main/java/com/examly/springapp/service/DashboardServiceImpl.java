@@ -1,12 +1,14 @@
 package com.examly.springapp.service;
 
 import com.examly.springapp.dto.AdminStatsDTO;
+import com.examly.springapp.dto.InstructorStatsDTO;
 import com.examly.springapp.dto.CustomerStatsDTO;
 import com.examly.springapp.exception.DatabaseOperationException;
 import com.examly.springapp.exception.ResourceNotFoundException;
 import com.examly.springapp.model.Cart;
 import com.examly.springapp.repository.CartRepo;
 import com.examly.springapp.repository.CourseRepo;
+import com.examly.springapp.repository.CourseVideoRepo;
 import com.examly.springapp.repository.CustomerRepo;
 import com.examly.springapp.repository.OrderRepo;
 import com.examly.springapp.repository.ReviewRepo;
@@ -29,9 +31,11 @@ public class DashboardServiceImpl implements DashboardService {
     private final OrderRepo orderRepo;
     private final ReviewRepo reviewRepo;
     private final CartRepo cartRepo;
+    private final CourseVideoRepo videoRepo;
 
     public DashboardServiceImpl(CourseRepo courseRepo, CustomerRepo customerRepo, OrderRepo orderRepo,
-                                ReviewRepo reviewRepo, CartRepo cartRepo) {
+                                ReviewRepo reviewRepo, CartRepo cartRepo, CourseVideoRepo videoRepo) {
+        this.videoRepo = videoRepo;
         this.courseRepo = courseRepo;
         this.customerRepo = customerRepo;
         this.orderRepo = orderRepo;
@@ -71,6 +75,23 @@ public class DashboardServiceImpl implements DashboardService {
         AdminStatsDTO stats = new AdminStatsDTO(courses, customers, orders, round2(revenue), reviews, round1(average));
         log.debug("getAdminStats: courses={}, customers={}, orders={}, reviews={}", courses, customers, orders, reviews);
         return stats;
+    }
+
+    @Override
+    public InstructorStatsDTO getInstructorStats(Long instructorUserId) {
+        log.trace("getInstructorStats entered for userId={}", instructorUserId);
+        long courses = DatabaseOperationException.guard("counting courses",
+                () -> (long) courseRepo.findByInstructor_UserIdOrderByCourseIdDesc(instructorUserId).size());
+        long lessons = DatabaseOperationException.guard("counting lessons",
+                () -> videoRepo.countByCourse_Instructor_UserId(instructorUserId));
+        long enrollments = DatabaseOperationException.guard("counting enrollments",
+                () -> orderRepo.countEnrollmentsByInstructorId(instructorUserId));
+        long learners = DatabaseOperationException.guard("counting learners",
+                () -> orderRepo.countLearnersByInstructorId(instructorUserId));
+        Double revenue = DatabaseOperationException.guard("summing revenue",
+                () -> orderRepo.sumRevenueByInstructorId(instructorUserId));
+        log.debug("getInstructorStats for user {}: courses={}, lessons={}, enrollments={}", instructorUserId, courses, lessons, enrollments);
+        return new InstructorStatsDTO(courses, lessons, enrollments, learners, round2(revenue));
     }
 
     /** Money rounded to cents; null (no rows) becomes 0. */

@@ -1,0 +1,16 @@
+<div class="page">
+    <div class="page-head">
+      <div><h2>My Courses</h2><p>Courses you created. Add video lessons so enrolled learners can watch them.</p></div>
+      <a mat-flat-button color="primary" routerLink="/instructor/add-course"><mat-icon>add</mat-icon>Create Course</a>
+    </div>
+    <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+    <div class="empty" *ngIf="loaded && !errorMessage && courses.length === 0">
+      <mat-icon>library_books</mat-icon><h3>No courses yet</h3><p>Create your first course, then add video lessons to it.</p>
+      <a mat-flat-button color="primary" routerLink="/instructor/add-course">Create Course</a>
+    </div>
+    <div class="course-grid">
+      <app-course-card *ngFor="let course of courses" mode="instructor" [course]="course"
+        (edit)="edit($event)" (videos)="videos($event)" (remove)="delete($event)"></app-course-card>
+    </div>
+  </div>
+  

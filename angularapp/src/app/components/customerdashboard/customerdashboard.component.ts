@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { STORAGE } from '../../constant';
 import { CustomerService } from '../../services/customer.service';
 
 @Component({
@@ -29,7 +30,7 @@ export class CustomerdashboardComponent {
     const customer = {
       customerName: this.detailsForm.value.customerName,
       information: this.detailsForm.value.information,
-      user: { userId: Number(localStorage.getItem('userId')) }
+      user: { userId: Number(localStorage.getItem(STORAGE.USER_ID)) }
     };
     this.customerService.registerCustomer(customer).subscribe({
       next: () => { this.loading = false; this.router.navigate(['/dashboard']); },

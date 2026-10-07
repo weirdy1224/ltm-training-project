@@ -1,11 +1,13 @@
 package com.examly.springapp.model;
 
+import com.examly.springapp.dto.InstructorProfileRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 /**
- * An account (ADMIN or CUSTOMER). The password is stored as a BCrypt hash and never serialised to JSON.
+ * An account (ADMIN, INSTRUCTOR or CUSTOMER). The password is stored as a BCrypt hash and never serialised to JSON.
  *
  * @author Suriya
  */
@@ -38,6 +40,29 @@ public class User {
     @NotBlank(message = "Role is required")
     private String role;
 
+    /**
+     * True once the owner typed the OTP that was emailed to them. READ_ONLY: a client can never set it in a request body.
+     * Nullable on purpose: accounts created before this column existed have null and count as verified.
+     */
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Boolean emailVerified;
+
+    /**
+     * Instructors must be approved by an admin before they can log in (customers and admins are approved at once).
+     * READ_ONLY and nullable for the same reasons as emailVerified.
+     */
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Boolean approved;
+
+    /**
+     * Only used while registering as an INSTRUCTOR (experience, skills, about). It is not a column of this table:
+     * the service saves it as an InstructorProfile. WRITE_ONLY so it is never sent back in a response.
+     */
+    @Transient
+    @Valid
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private InstructorProfileRequest instructorProfile;
+
     /** No-arg constructor required by JPA and Jackson. */
     public User() {}
 
@@ -69,4 +94,17 @@ public class User {
     public void setMobileNumber(String mobileNumber) { this.mobileNumber = mobileNumber; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public Boolean getEmailVerified() { return emailVerified; }
+    public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
+    public Boolean getApproved() { return approved; }
+    public void setApproved(Boolean approved) { this.approved = approved; }
+
+    public InstructorProfileRequest getInstructorProfile() { return instructorProfile; }
+    public void setInstructorProfile(InstructorProfileRequest instructorProfile) { this.instructorProfile = instructorProfile; }
+
+    /** Old accounts (null) count as verified, so adding the column never locks anybody out. */
+    public boolean hasVerifiedEmail() { return emailVerified == null || emailVerified; }
+
+    /** Old accounts (null) count as approved. */
+    public boolean hasBeenApproved() { return approved == null || approved; }
 }

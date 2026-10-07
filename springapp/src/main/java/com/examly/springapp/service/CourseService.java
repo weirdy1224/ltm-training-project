@@ -18,6 +18,9 @@ public interface CourseService {
     Course updateCourse(Long courseId, Course course);
     void deleteCourse(Long courseId);
 
+    /** The courses one instructor owns, newest first (an empty list when there are none). */
+    List<Course> getCoursesByInstructor(Long instructorUserId);
+
     /**
      * Keyword / price-range search with sorting and paging.
      *

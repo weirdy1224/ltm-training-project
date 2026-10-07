@@ -11,6 +11,7 @@
     <h3><a [routerLink]="['/course-details', course.courseId]">{{ course.courseType }}</a></h3>
     <p>{{ course.courseDetails }}</p>
     <app-star-rating [value]="rating?.averageRating || 0" [count]="rating?.reviewCount"></app-star-rating>
+    <small class="by" *ngIf="course.instructorName">By {{ course.instructorName }}</small>
     <span class="price">{{ course.coursePrice | currency:'INR':'symbol':'1.0-2' }}</span>
   </div>
   <div class="foot" *ngIf="mode === 'customer' && enrolled">
@@ -24,9 +25,11 @@
     </button>
     <a mat-stroked-button [routerLink]="['/course-details', course.courseId]">Details</a>
   </div>
-  <div class="foot" *ngIf="mode === 'admin'">
+  <div class="foot" *ngIf="mode === 'admin' || mode === 'instructor'">
     <button mat-stroked-button color="primary" class="edit-btn"
       (click)="edit.emit(course)"><mat-icon>edit</mat-icon>Edit</button>
+    <button mat-stroked-button color="primary" class="videos-btn"
+      (click)="videos.emit(course)"><mat-icon>video_library</mat-icon>Videos</button>
     <button mat-stroked-button color="warn" class="delete-btn"
       (click)="remove.emit(course)"><mat-icon>delete</mat-icon>Delete</button>
   </div>

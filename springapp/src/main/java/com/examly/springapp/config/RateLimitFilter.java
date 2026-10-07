@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Limits requests per client IP: a global limit and a stricter one for login, register and refresh.
+ * Limits requests per client IP: a global limit and a stricter one for login, register, refresh and the OTP calls.
  *
  * @author Suriya
  */
@@ -35,7 +35,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
         String ip = request.getRemoteAddr();
         String path = request.getRequestURI();
-        boolean authCall = path.equals("/api/login") || path.equals("/api/register") || path.equals("/api/refresh");
+        // a playing video makes many Range requests; they are protected by the signed token instead of the per-IP limit
+        if (path.startsWith("/api/video/") && path.endsWith("/stream")) {
+            chain.doFilter(request, response);
+            return;
+        }
+        boolean authCall = path.equals("/api/login") || path.equals("/api/register") || path.equals("/api/refresh")
+                || path.equals("/api/verify-otp") || path.equals("/api/resend-otp")
+                || path.equals("/api/instructor-application/status");
         if (authCall && !limiter.tryAcquire("auth:" + ip, authPerMinute, WINDOW_MS)) {
             reject(response, limiter.retryAfterSeconds("auth:" + ip, WINDOW_MS));
             return;
