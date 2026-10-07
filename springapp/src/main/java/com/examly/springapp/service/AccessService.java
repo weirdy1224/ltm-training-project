@@ -1,6 +1,7 @@
 package com.examly.springapp.service;
 
 import com.examly.springapp.exception.ResourceNotFoundException;
+import com.examly.springapp.model.Course;
 import com.examly.springapp.model.Customer;
 import com.examly.springapp.model.User;
 import com.examly.springapp.repository.CustomerRepo;
@@ -11,7 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
- * Who is calling, and may they touch this data? Controllers use it so the identity always comes
+ * Who is calling, and may they touch this data? (admin, instructor or customer) Controllers use it so the identity always comes
  * from the verified JWT and never from ids the client sends (this prevents reading other people's data).
  *
  * @author Suriya
@@ -40,6 +41,19 @@ public class AccessService {
 
     public boolean isAdmin() {
         return auth().getAuthorities().stream().anyMatch(g -> "ADMIN".equals(g.getAuthority()));
+    }
+
+    public boolean isInstructor() {
+        return auth().getAuthorities().stream().anyMatch(g -> "INSTRUCTOR".equals(g.getAuthority()));
+    }
+
+    /** Admins may manage any course; an instructor only the courses they own. */
+    public void requireCourseManager(Course course) {
+        if (isAdmin()) return;
+        Long owner = course.getInstructor() == null ? null : course.getInstructor().getUserId();
+        if (owner == null || !owner.equals(currentUser().getUserId())) {
+            throw new AccessDeniedException("You can only manage your own courses");
+        }
     }
 
     public User currentUser() {

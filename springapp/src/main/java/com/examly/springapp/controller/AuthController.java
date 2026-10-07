@@ -18,7 +18,6 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +28,17 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
+import com.examly.springapp.dto.ApplicationStatusRequest;
+import com.examly.springapp.dto.ApplicationStatusResponse;
 import com.examly.springapp.dto.ForgotPasswordRequest;
+import com.examly.springapp.dto.ResendOtpRequest;
 import com.examly.springapp.dto.ResetPasswordRequest;
+import com.examly.springapp.dto.VerifyOtpRequest;
+import com.examly.springapp.service.OtpService;
 import com.examly.springapp.service.PasswordResetService;
 
 /**
- * Registration, login, token refresh and logout. The access token travels in
+ * Registration (with email OTP), login, token refresh and logout. The access token travels in
  * the response body,
  * the refresh token only in an HttpOnly cookie. Passwords and tokens are never
  * logged.
@@ -43,7 +47,7 @@ import com.examly.springapp.service.PasswordResetService;
  */
 @RestController
 @RequestMapping("/api")
-@Tag(name = "Authentication", description = "Register, log in, refresh the access token and log out")
+@Tag(name = "Authentication", description = "Register, verify the email OTP, log in, refresh the access token and log out")
 public class AuthController {
         private static final Logger log = LoggerFactory.getLogger(AuthController.class);
         private static final String REFRESH_COOKIE = "refresh_token";
@@ -56,6 +60,7 @@ public class AuthController {
         private final long refreshDays;
         private final GoogleAuthService authService;
         private final PasswordResetService passwordResetService;
+        private final OtpService otpService;
 
         @Autowired
         public AuthController(
@@ -66,7 +71,8 @@ public class AuthController {
                         @Value("${app.cookie.secure:false}") boolean secureCookie,
                         @Value("${jwt.refresh-expiration-days:7}") long refreshDays,
                         GoogleAuthService googleAuthService,
-                        PasswordResetService passwordResetService) {
+                        PasswordResetService passwordResetService,
+                        OtpService otpService) {
 
                 this.userService = userService;
                 this.jwtUtil = jwtUtil;
@@ -76,22 +82,21 @@ public class AuthController {
                 this.refreshDays = refreshDays;
                 this.authService = googleAuthService;
                 this.passwordResetService = passwordResetService;
+                this.otpService = otpService;
         }
 
-        @Operation(summary = "Register a new customer", description = "Public. Always creates a CUSTOMER. Admin accounts are created by the seeded admin through /api/admin/users.")
+        @Operation(summary = "Sign in with Google", description = "Public. Verifies the Google ID token and returns the same answer as /api/login. A new Google user becomes a CUSTOMER with a verified email.")
         @ApiResponses({
-                        @ApiResponse(responseCode = "201", description = "User created"),
-                        @ApiResponse(responseCode = "400", description = "Validation failed (email, mobile number, password rules, role)"),
-                        @ApiResponse(responseCode = "403", description = "The ADMIN role cannot be requested here"),
-                        @ApiResponse(responseCode = "409", description = "A user with this email already exists")
+                        @ApiResponse(responseCode = "200", description = "Logged in"),
+                        @ApiResponse(responseCode = "401", description = "Invalid Google token or the Google email is not verified"),
+                        @ApiResponse(responseCode = "403", description = "Instructor account still waiting for admin approval")
         })
-
         @PostMapping("/google-login")
         public ResponseEntity<Map<String, Object>> googleLogin(
                         @RequestBody GoogleLoginRequest request)
                         throws Exception {
 
-                System.out.println("GOOGLE LOGIN ENDPOINT HIT");
+                log.trace("googleLogin called");
 
                 User user = authService.googleLogin(
                                 request.getCredential());
@@ -99,6 +104,14 @@ public class AuthController {
                 return session(user);
         }
 
+        @Operation(summary = "Register a new customer or instructor", description = "Public. Role CUSTOMER (default) or INSTRUCTOR; ADMIN is refused. The account is created inactive and a 6-digit OTP is emailed; call /api/verify-otp next. Instructors also wait for admin approval. Admin accounts are created by the main admin through /api/admin/users.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "201", description = "User created, OTP emailed"),
+                        @ApiResponse(responseCode = "400", description = "Validation failed (email, mobile number, password rules)"),
+                        @ApiResponse(responseCode = "403", description = "The ADMIN role cannot be requested here"),
+                        @ApiResponse(responseCode = "409", description = "A user with this email already exists"),
+                        @ApiResponse(responseCode = "502", description = "The account was saved but the OTP email could not be sent; use /api/resend-otp")
+        })
         @PostMapping("/register")
         public ResponseEntity<User> register(@Valid @RequestBody User user) {
                 log.trace("register called");
@@ -107,11 +120,57 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.CREATED).body(saved);
         }
 
+        @Operation(summary = "Verify the email OTP", description = "Public. Activates the account when the 6 digits match. Returns {message, role, approved}; an instructor still needs admin approval before logging in.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Email verified"),
+                        @ApiResponse(responseCode = "400", description = "Wrong, expired or over-used OTP"),
+                        @ApiResponse(responseCode = "429", description = "Too many requests")
+        })
+        @PostMapping("/verify-otp")
+        public ResponseEntity<Map<String, Object>> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+                log.trace("verifyOtp called");
+                User user = otpService.verify(request.getEmail(), request.getOtp());
+                Map<String, Object> body = new LinkedHashMap<>();
+                body.put("message", user.hasBeenApproved()
+                                ? "Email verified. You can log in now."
+                                : "Email verified. An admin must approve your instructor account before you can log in.");
+                body.put("role", user.getRole());
+                body.put("approved", user.hasBeenApproved());
+                return ResponseEntity.status(HttpStatus.OK).body(body);
+        }
+
+        @Operation(summary = "Send a new OTP", description = "Public. Always answers 200 so it reveals nothing about registered emails; 429 while the cool-down of the previous OTP is running.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "OTP sent if the account exists and is not verified"),
+                        @ApiResponse(responseCode = "429", description = "Please wait before asking again (see Retry-After)"),
+                        @ApiResponse(responseCode = "502", description = "The email could not be sent")
+        })
+        @PostMapping("/resend-otp")
+        public ResponseEntity<Map<String, String>> resendOtp(@Valid @RequestBody ResendOtpRequest request) {
+                log.trace("resendOtp called");
+                otpService.resend(request.getEmail());
+                return ResponseEntity.status(HttpStatus.OK)
+                                .body(Map.of("message", "If this email is waiting for verification, a new OTP has been sent."));
+        }
+
+        @Operation(summary = "Track an instructor application", description = "Public. Send the email used to apply; the answer is only the step (EMAIL_NOT_VERIFIED, UNDER_REVIEW, APPROVED or NOT_FOUND), never personal data.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Status returned (NOT_FOUND is also a 200, so the page reveals nothing about other users)"),
+                        @ApiResponse(responseCode = "400", description = "Email missing or invalid"),
+                        @ApiResponse(responseCode = "429", description = "Too many requests")
+        })
+        @PostMapping("/instructor-application/status")
+        public ResponseEntity<ApplicationStatusResponse> applicationStatus(@Valid @RequestBody ApplicationStatusRequest request) {
+                log.trace("applicationStatus called");
+                return ResponseEntity.status(HttpStatus.OK).body(userService.getApplicationStatus(request.getEmail()));
+        }
+
         @Operation(summary = "Log in", description = "Returns {token, expiresIn, userId, role, username, email} and sets the refresh cookie.")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Logged in"),
                         @ApiResponse(responseCode = "400", description = "Email or password missing"),
                         @ApiResponse(responseCode = "401", description = "Wrong email or password"),
+                        @ApiResponse(responseCode = "403", description = "Correct password but the email is not verified (code EMAIL_NOT_VERIFIED) or the instructor is not approved yet (code APPROVAL_PENDING)"),
                         @ApiResponse(responseCode = "429", description = "Too many attempts, see the Retry-After header")
         })
         @PostMapping("/login")

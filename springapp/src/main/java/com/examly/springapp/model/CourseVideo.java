@@ -1,77 +1,96 @@
 package com.examly.springapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 /**
- * Details (metadata) of one uploaded lesson video. The video file itself lives on disk under
- * {@code video.storage-dir}; this row says what it is and where it belongs.
- * The course is kept as a plain number on purpose, so the existing Course table is not changed.
+ * One video lesson of a course. The video FILE lives in the video folder on the server (app.video.dir); this row keeps
+ * its relative path and details. The entity is never sent to the browser directly (see CourseVideoDTO) so that the
+ * server's file path stays private.
+ *
+ * @author Lokesh
  */
 @Entity
-@Table(name = "course_videos", indexes = @Index(name = "idx_course_videos_course", columnList = "courseId"))
+@Table(name = "course_video")
 public class CourseVideo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long videoId;
 
-    @Column(nullable = false)
-    private Long courseId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "course_id", nullable = false)
+    @JsonIgnore
+    private Course course;
 
     @Column(nullable = false, length = 150)
     private String title;
 
-    @Column(length = 500)
+    @Column(length = 1000)
     private String description;
 
-    /** Random name on disk, never the name the user chose. */
-    @Column(nullable = false, unique = true, length = 80)
-    private String storedName;
+    /** Position in the course (1 = first lesson). */
+    private int orderIndex;
 
-    @Column(length = 200)
-    private String originalName;
+    @Column(length = 255)
+    private String originalFileName;
 
-    @Column(nullable = false, length = 50)
+    /** Path of the saved file relative to the video folder, for example "course-5/3f2a....mp4". */
+    @Column(nullable = false, length = 300)
+    @JsonIgnore
+    private String filePath;
+
+    @Column(length = 60)
     private String contentType;
 
-    @Column(nullable = false)
     private long sizeBytes;
 
-    /** Length in seconds as reported by the uploader's browser; 0 when unknown. */
-    @Column(nullable = false)
-    private int durationSec;
+    @ManyToOne
+    @JoinColumn(name = "uploaded_by")
+    @JsonIgnore
+    private User uploadedBy;
 
-    @Column(nullable = false)
-    private Long uploadedByUserId;
+    private LocalDateTime uploadedAt;
 
-    @Column(nullable = false)
-    private long uploadedAtMs;
-
+    /** No-arg constructor required by JPA. */
     public CourseVideo() {}
 
-    public CourseVideo(Long courseId, String title, String description, String storedName, String originalName,
-                       String contentType, long sizeBytes, int durationSec, Long uploadedByUserId, long uploadedAtMs) {
-        this.courseId = courseId;
+    /** New lesson (no id yet); chains to the no-arg constructor. */
+    public CourseVideo(Course course, String title, String description, int orderIndex, String originalFileName,
+                       String filePath, String contentType, long sizeBytes, User uploadedBy) {
+        this();
+        this.course = course;
         this.title = title;
         this.description = description;
-        this.storedName = storedName;
-        this.originalName = originalName;
+        this.orderIndex = orderIndex;
+        this.originalFileName = originalFileName;
+        this.filePath = filePath;
         this.contentType = contentType;
         this.sizeBytes = sizeBytes;
-        this.durationSec = durationSec;
-        this.uploadedByUserId = uploadedByUserId;
-        this.uploadedAtMs = uploadedAtMs;
+        this.uploadedBy = uploadedBy;
+        this.uploadedAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getCourseId() { return courseId; }
+    public Long getVideoId() { return videoId; }
+    public void setVideoId(Long videoId) { this.videoId = videoId; }
+    public Course getCourse() { return course; }
+    public void setCourse(Course course) { this.course = course; }
     public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
     public String getDescription() { return description; }
-    public String getStoredName() { return storedName; }
-    public String getOriginalName() { return originalName; }
+    public void setDescription(String description) { this.description = description; }
+    public int getOrderIndex() { return orderIndex; }
+    public void setOrderIndex(int orderIndex) { this.orderIndex = orderIndex; }
+    public String getOriginalFileName() { return originalFileName; }
+    public void setOriginalFileName(String originalFileName) { this.originalFileName = originalFileName; }
+    public String getFilePath() { return filePath; }
+    public void setFilePath(String filePath) { this.filePath = filePath; }
     public String getContentType() { return contentType; }
+    public void setContentType(String contentType) { this.contentType = contentType; }
     public long getSizeBytes() { return sizeBytes; }
-    public int getDurationSec() { return durationSec; }
-    public Long getUploadedByUserId() { return uploadedByUserId; }
-    public long getUploadedAtMs() { return uploadedAtMs; }
+    public void setSizeBytes(long sizeBytes) { this.sizeBytes = sizeBytes; }
+    public User getUploadedBy() { return uploadedBy; }
+    public void setUploadedBy(User uploadedBy) { this.uploadedBy = uploadedBy; }
+    public LocalDateTime getUploadedAt() { return uploadedAt; }
+    public void setUploadedAt(LocalDateTime uploadedAt) { this.uploadedAt = uploadedAt; }
 }

@@ -1,6 +1,7 @@
 package com.examly.springapp.controller;
 
 import com.examly.springapp.dto.AdminStatsDTO;
+import com.examly.springapp.dto.InstructorStatsDTO;
 import com.examly.springapp.dto.CustomerStatsDTO;
 import com.examly.springapp.service.AccessService;
 import com.examly.springapp.service.DashboardService;
@@ -53,6 +54,19 @@ public class DashboardController {
         log.trace("getCustomerStats called for customerId={}", customerId);
         access.requireCustomerAccess(customerId);   // ownership: only your own numbers
         return ResponseEntity.status(HttpStatus.OK).body(dashboardService.getCustomerStats(customerId));
+    }
+
+    @Operation(summary = "Instructor dashboard statistics",
+            description = "INSTRUCTOR only, own courses. Returns {totalCourses, totalLessons, totalEnrollments, totalLearners, totalRevenue}.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Statistics returned"),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token"),
+            @ApiResponse(responseCode = "403", description = "Not an instructor")
+    })
+    @GetMapping("/instructor")
+    public ResponseEntity<InstructorStatsDTO> getInstructorStats() {
+        log.trace("getInstructorStats called");
+        return ResponseEntity.status(HttpStatus.OK).body(dashboardService.getInstructorStats(access.currentUser().getUserId()));
     }
 
     @Operation(summary = "Admin dashboard statistics",

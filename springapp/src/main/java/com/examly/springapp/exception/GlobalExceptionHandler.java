@@ -26,6 +26,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -72,7 +73,14 @@ public class GlobalExceptionHandler {
         if (headers != null) {
             builder.headers(headers);
         }
-        return builder.body(body(status, message, req));
+        Map<String, Object> payload = body(status, message, req);
+        if (ex instanceof AppException) {
+            String code = ((AppException) ex).getCode();
+            if (code != null) {
+                payload.put("code", code);   // lets the Angular app tell "verify your email" from "wait for approval"
+            }
+        }
+        return builder.body(payload);
     }
 
     private ResponseEntity<Map<String, Object>> build(HttpStatus status, Exception ex, String message, HttpServletRequest req) {
@@ -141,6 +149,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> unreadable(HttpMessageNotReadableException ex, HttpServletRequest req) {
         return build(HttpStatus.BAD_REQUEST, ex, "Malformed request body", req);
+    }
+
+    /** The multipart limit (spring.servlet.multipart.max-file-size) was exceeded before the controller ran. */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> tooLarge(MaxUploadSizeExceededException ex, HttpServletRequest req) {
+        return build(HttpStatus.PAYLOAD_TOO_LARGE, ex, "The file is larger than the server allows", req);
     }
 
     // ---- routing problems ----

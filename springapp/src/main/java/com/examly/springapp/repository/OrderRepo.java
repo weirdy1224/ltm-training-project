@@ -17,6 +17,17 @@ import org.springframework.stereotype.Repository;
 public interface OrderRepo extends JpaRepository<Orders, Long> {
     List<Orders> findByCustomer_CustomerId(Long customerId);
     List<Orders> findByCourses_CourseId(Long courseId);
+    /** True when the customer bought the course (used to unlock its video lessons). */
+    boolean existsByCustomer_CustomerIdAndCourses_CourseId(Long customerId, Long courseId);
+    /** Enrollments in an instructor's courses (one per course per order). */
+    @Query("SELECT COUNT(c) FROM Orders o JOIN o.courses c WHERE c.instructor.userId = :instructorId")
+    long countEnrollmentsByInstructorId(@Param("instructorId") Long instructorId);
+    /** Different learners who bought at least one course of the instructor. */
+    @Query("SELECT COUNT(DISTINCT o.customer.customerId) FROM Orders o JOIN o.courses c WHERE c.instructor.userId = :instructorId")
+    long countLearnersByInstructorId(@Param("instructorId") Long instructorId);
+    /** Sum of the prices of the instructor's courses over all enrollments, or null when there are none. */
+    @Query("SELECT SUM(c.coursePrice) FROM Orders o JOIN o.courses c WHERE c.instructor.userId = :instructorId")
+    Double sumRevenueByInstructorId(@Param("instructorId") Long instructorId);
 
     /** Number of orders a customer has placed. */
     long countByCustomer_CustomerId(Long customerId);

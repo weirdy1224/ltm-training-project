@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
  *         +-- RateLimitExceededException   429
  *         +-- ApiCommunicationException    502
  *         +-- DatabaseOperationException   500 (wraps DataAccessException)
+ *         +-- AccountNotActiveException    403 (email not verified / instructor not approved)
  * </pre>
  *
  * @author Team Lead
@@ -35,6 +36,11 @@ public abstract class AppException extends RuntimeException {
 
     public HttpStatus getStatus() {
         return status;
+    }
+
+    /** Optional machine-readable code the Angular app can react to (for example EMAIL_NOT_VERIFIED); null for most errors. */
+    public String getCode() {
+        return null;
     }
 
     /** The text that is safe to show to API clients. Subclasses hide internal details by overriding it. */
