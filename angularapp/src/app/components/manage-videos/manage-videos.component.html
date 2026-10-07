@@ -1,0 +1,108 @@
+<div class="page">
+    <div class="page-head">
+      <div>
+        <h2>Video lessons</h2>
+        <p *ngIf="course">{{ course.courseType }}: upload MP4 or WebM videos. Learners who enroll can watch them in this order.</p>
+      </div>
+      <a mat-stroked-button color="primary" [routerLink]="backLink"><mat-icon>arrow_back</mat-icon>Back to courses</a>
+    </div>
+  
+    <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+  
+    <div class="layout">
+      <section>
+        <div class="empty" *ngIf="loaded && videos.length === 0">
+          <mat-icon>video_library</mat-icon>
+          <h3>No lessons yet</h3>
+          <p>Add the first video with the form.</p>
+        </div>
+  
+        <div class="table-card" *ngIf="videos.length > 0">
+          <table class="data" id="videoTable">
+            <thead><tr><th>#</th><th>Lesson</th><th>File</th><th></th></tr></thead>
+            <tbody>
+              <ng-container *ngFor="let v of videos">
+                <tr>
+                  <td>{{ v.orderIndex }}</td>
+                  <td>
+                    <strong>{{ v.title }}</strong>
+                    <div class="muted small" *ngIf="v.description">{{ v.description }}</div>
+                  </td>
+                  <td class="muted small">{{ v.originalFileName }}<br />{{ size(v.sizeBytes) }}</td>
+                  <td class="num actions">
+                    <a mat-icon-button color="primary" [routerLink]="['/watch-course', courseId]" [queryParams]="{ video: v.videoId }"
+                      aria-label="Preview" title="Preview"><mat-icon>play_circle</mat-icon></a>
+                    <button mat-icon-button type="button" (click)="startEdit(v)" aria-label="Edit lesson" title="Edit"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button color="warn" type="button" class="delete-video" (click)="remove(v)" aria-label="Delete lesson" title="Delete"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+                <tr *ngIf="editing?.videoId === v.videoId" class="edit-row">
+                  <td colspan="4">
+                    <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form" novalidate>
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>Title</mat-label>
+                        <input matInput formControlName="title" />
+                        <mat-error *ngIf="e['title'].errors?.['required']">Title is required</mat-error>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="order">
+                        <mat-label>Order</mat-label>
+                        <input matInput type="number" min="1" formControlName="orderIndex" />
+                        <mat-error *ngIf="e['orderIndex'].errors">1 or more</mat-error>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wide">
+                        <mat-label>Description</mat-label>
+                        <input matInput formControlName="description" />
+                      </mat-form-field>
+                      <div class="edit-actions">
+                        <button mat-flat-button color="primary" type="submit" [disabled]="editForm.invalid || savingEdit">Save</button>
+                        <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+                      </div>
+                    </form>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </section>
+  
+      <section class="form-card">
+        <h2>Add a lesson</h2>
+        <p class="lead">MP4 or WebM, up to 500 MB.</p>
+        <form [formGroup]="uploadForm" (ngSubmit)="upload()" novalidate>
+          <input #fileInput type="file" id="videoFile" hidden accept="video/mp4,video/webm" (change)="onFileSelected($event)" />
+          <div class="file-row">
+            <button mat-stroked-button color="primary" type="button" id="browseVideo" [disabled]="uploading" (click)="fileInput.click()">
+              <mat-icon>upload_file</mat-icon>{{ file ? 'Change video' : 'Choose video' }}
+            </button>
+            <span class="muted small file-name" *ngIf="file">{{ file.name }} ({{ size(file.size) }})</span>
+          </div>
+          <div class="form-error small" role="alert" *ngIf="fileError">{{ fileError }}</div>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Lesson title</mat-label>
+            <input matInput id="videoTitle" formControlName="title" />
+            <mat-error *ngIf="f['title'].errors?.['required']">Title is required</mat-error>
+            <mat-error *ngIf="f['title'].errors?.['maxlength']">Title is too long</mat-error>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Description (optional)</mat-label>
+            <textarea matInput id="videoDescription" rows="3" formControlName="description"></textarea>
+            <mat-error *ngIf="f['description'].errors?.['maxlength']">Description is too long</mat-error>
+          </mat-form-field>
+  
+          <div class="progress" *ngIf="uploading">
+            <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
+            <span class="muted small">Uploading {{ progress }}%. Keep this page open.</span>
+          </div>
+  
+          <div class="form-actions">
+            <button mat-flat-button color="primary" type="submit" id="uploadVideoButton"
+              [disabled]="uploadForm.invalid || !file || uploading">{{ uploading ? 'Uploading...' : 'Upload lesson' }}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+  

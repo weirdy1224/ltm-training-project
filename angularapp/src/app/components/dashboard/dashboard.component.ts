@@ -29,6 +29,11 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.name = this.userStore.user?.username || '';
+    if (this.role === ROLES.INSTRUCTOR) {
+      // instructors have their own landing page
+      this.router.navigate(['/instructor/dashboard'], { replaceUrl: true });
+      return;
+    }
     if (this.role === ROLES.ADMIN) {
       this.customerService.getAdminStats().subscribe({
         next: (s) => (this.adminStats = s),

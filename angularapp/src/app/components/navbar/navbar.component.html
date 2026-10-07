@@ -10,6 +10,8 @@
       <ng-container *ngIf="!role">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
         <a routerLink="/registration" routerLinkActive="active">Register</a>
+        <a routerLink="/instructor-register" routerLinkActive="active">Become an Instructor</a>
+        <a routerLink="/application-status" routerLinkActive="active">Track Application</a>
         <a routerLink="/login" routerLinkActive="active">Login</a>
       </ng-container>
 
@@ -20,6 +22,13 @@
         <a routerLink="/view-orders" routerLinkActive="active">View Enrollments</a>
         <a routerLink="/view-review" routerLinkActive="active">View Reviews</a>
         <a routerLink="/manage-admins" routerLinkActive="active">Manage Admins</a>
+        <a routerLink="/manage-instructors" routerLinkActive="active">Instructors</a>
+      </ng-container>
+
+      <ng-container *ngIf="role === 'INSTRUCTOR'">
+        <a routerLink="/instructor/dashboard" routerLinkActive="active">Home</a>
+        <a routerLink="/instructor/courses" routerLinkActive="active">My Courses</a>
+        <a routerLink="/instructor/add-course" routerLinkActive="active">Create Course</a>
       </ng-container>
 
       <ng-container *ngIf="role === 'CUSTOMER'">
@@ -39,6 +48,8 @@
       <ng-container *ngIf="!role">
         <a mat-menu-item routerLink="/">Home</a>
         <a mat-menu-item routerLink="/registration">Register</a>
+        <a mat-menu-item routerLink="/instructor-register">Become an Instructor</a>
+        <a mat-menu-item routerLink="/application-status">Track Application</a>
         <a mat-menu-item routerLink="/login">Login</a>
       </ng-container>
       <ng-container *ngIf="role === 'ADMIN'">
@@ -48,6 +59,12 @@
         <a mat-menu-item routerLink="/view-orders">View Enrollments</a>
         <a mat-menu-item routerLink="/view-review">View Reviews</a>
         <a mat-menu-item routerLink="/manage-admins">Manage Admins</a>
+        <a mat-menu-item routerLink="/manage-instructors">Instructors</a>
+      </ng-container>
+      <ng-container *ngIf="role === 'INSTRUCTOR'">
+        <a mat-menu-item routerLink="/instructor/dashboard">Home</a>
+        <a mat-menu-item routerLink="/instructor/courses">My Courses</a>
+        <a mat-menu-item routerLink="/instructor/add-course">Create Course</a>
       </ng-container>
       <ng-container *ngIf="role === 'CUSTOMER'">
         <a mat-menu-item routerLink="/dashboard">Home</a>

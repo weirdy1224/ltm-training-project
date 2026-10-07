@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { STORAGE } from '../../constant';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { Course } from '../../models/course.model';
@@ -57,7 +58,7 @@ export class PlaceOrderComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
     const order = {
-      customer: { customerId: Number(localStorage.getItem('customerId')) },
+      customer: { customerId: Number(localStorage.getItem(STORAGE.CUSTOMER_ID)) },
       courses: this.courses.map(c => ({ courseId: c.courseId })),
       orderPrice: this.orderForm.getRawValue().totalPrice
     };

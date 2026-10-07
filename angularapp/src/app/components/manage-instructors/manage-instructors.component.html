@@ -1,0 +1,50 @@
+<div class="page">
+    <div class="page-head"><div><h2>Manage Instructors</h2><p>Instructors register themselves with their experience and background, then verify their email with an OTP. Open Details to read what they wrote, then approve or reject.</p></div></div>
+    <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+    <div class="empty" *ngIf="loaded && !errorMessage && instructors.length === 0">
+      <mat-icon>co_present</mat-icon><h3>No instructors yet</h3><p>Instructor registrations will appear here.</p>
+    </div>
+    <div class="table-card" *ngIf="instructors.length > 0">
+      <table class="data" id="instructorTable">
+        <thead><tr><th>Name</th><th>Email</th><th>Experience</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <ng-container *ngFor="let i of instructors">
+            <tr>
+              <td>{{ i.username }}<small class="sub" *ngIf="i.headline">{{ i.headline }}</small></td>
+              <td>{{ i.email }}</td>
+              <td>{{ i.hasProfile ? i.yearsOfExperience + ' yrs' : '-' }}</td>
+              <td>
+                <span class="pill ok" *ngIf="isApproved(i) && isVerified(i)">Approved</span>
+                <span class="pill warn" *ngIf="!isVerified(i)">Email not verified</span>
+                <span class="pill warn" *ngIf="isVerified(i) && !isApproved(i)">Waiting for approval</span>
+              </td>
+              <td class="num">
+                <button mat-stroked-button color="primary" class="view-details" (click)="toggle(i)"><mat-icon>{{ isOpen(i) ? 'expand_less' : 'expand_more' }}</mat-icon>Details</button>
+                <button mat-flat-button color="primary" class="approve-instructor" *ngIf="!isApproved(i)" [disabled]="!isVerified(i)" (click)="approve(i)"><mat-icon>check</mat-icon>Approve</button>
+                <button mat-stroked-button color="warn" class="reject-instructor" *ngIf="!isApproved(i)" (click)="reject(i)"><mat-icon>close</mat-icon>Reject</button>
+              </td>
+            </tr>
+            <tr class="detail-row" *ngIf="isOpen(i)">
+              <td colspan="5">
+                <div class="detail" *ngIf="i.hasProfile; else noProfile">
+                  <dl>
+                    <dt>Mobile</dt><dd>{{ i.mobileNumber }}</dd>
+                    <dt>Qualification</dt><dd>{{ i.qualification }}</dd>
+                    <dt>Skills</dt><dd>{{ i.expertise }}</dd>
+                    <dt *ngIf="i.organization">Organization</dt><dd *ngIf="i.organization">{{ i.organization }}</dd>
+                    <dt>About</dt><dd class="long">{{ i.about }}</dd>
+                    <dt>Work done</dt><dd class="long">{{ i.experienceSummary }}</dd>
+                    <dt *ngIf="i.linkedinUrl">LinkedIn</dt><dd *ngIf="i.linkedinUrl"><a [href]="i.linkedinUrl" target="_blank" rel="noopener noreferrer">{{ i.linkedinUrl }}</a></dd>
+                    <dt *ngIf="i.portfolioUrl">Portfolio</dt><dd *ngIf="i.portfolioUrl"><a [href]="i.portfolioUrl" target="_blank" rel="noopener noreferrer">{{ i.portfolioUrl }}</a></dd>
+                    <dt>Submitted</dt><dd>{{ i.submittedAt | date:'medium' }}</dd>
+                  </dl>
+                </div>
+                <ng-template #noProfile><p class="muted">This account was created before instructor profiles existed, so there are no details to show. Mobile: {{ i.mobileNumber }}</p></ng-template>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  

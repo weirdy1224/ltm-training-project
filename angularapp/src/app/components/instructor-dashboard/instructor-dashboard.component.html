@@ -1,0 +1,22 @@
+<section class="hero">
+    <div class="hero-inner">
+      <span class="hero-badge">🎬 Instructor Studio</span>
+      <h1>Welcome{{ name ? ', ' + name : '' }}</h1>
+      <p class="intro">Create courses, upload video lessons and see how many learners enrolled.</p>
+      <div class="cta">
+        <a mat-flat-button color="primary" routerLink="/instructor/add-course">Create Course</a>
+        <a mat-stroked-button class="ghost" routerLink="/instructor/courses">My Courses</a>
+      </div>
+    </div>
+  </section>
+  <div class="page">
+    <div class="tiles" *ngIf="stats">
+      <div class="tile"><mat-icon>library_books</mat-icon><strong>{{ stats.totalCourses || 0 }}</strong><span>My Courses</span></div>
+      <div class="tile"><mat-icon>play_lesson</mat-icon><strong>{{ stats.totalLessons || 0 }}</strong><span>Video Lessons</span></div>
+      <div class="tile"><mat-icon>receipt_long</mat-icon><strong>{{ stats.totalEnrollments || 0 }}</strong><span>Enrollments</span></div>
+      <div class="tile"><mat-icon>group</mat-icon><strong>{{ stats.totalLearners || 0 }}</strong><span>Learners</span></div>
+      <div class="tile"><mat-icon>payments</mat-icon><strong>{{ stats.totalRevenue || 0 | currency:'INR':'symbol':'1.0-0' }}</strong><span>Revenue</span></div>
+    </div>
+    <p class="muted" *ngIf="statsFailed">Statistics could not be loaded right now.</p>
+  </div>
+  

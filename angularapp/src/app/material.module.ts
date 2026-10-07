@@ -16,12 +16,14 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 const MODULES = [
   MatToolbarModule, MatButtonModule, MatIconModule, MatCardModule, MatFormFieldModule, MatInputModule,
   MatSelectModule, MatTableModule, MatSnackBarModule, MatDialogModule, MatProgressSpinnerModule,
   MatMenuModule, MatChipsModule, MatDividerModule, MatTooltipModule,
-  MatPaginatorModule, MatBadgeModule
+  MatPaginatorModule, MatBadgeModule, MatProgressBarModule, MatCheckboxModule
 ];
 
 /** Every Angular Material piece the app uses, in one place. */

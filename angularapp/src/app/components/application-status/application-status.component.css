@@ -1,0 +1,11 @@
+.narrow { max-width: 720px; margin: 0 auto; }
+.check-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; margin-bottom: 20px; }
+.check-form .grow { flex: 1 1 320px; }
+.check-form button { height: 56px; }
+.result { border: 1px solid rgba(128, 128, 128, .25); border-radius: 16px; padding: 24px; }
+.steps { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 12px; }
+.steps li { display: flex; align-items: center; gap: 12px; opacity: .55; }
+.steps li.done { opacity: 1; color: #34c759; }
+.steps li.current { opacity: 1; color: #f5a50b; font-weight: 600; }
+.msg { font-size: 16px; line-height: 1.5; margin: 8px 0; }
+.actions { margin-top: 12px; display: flex; gap: 8px; }

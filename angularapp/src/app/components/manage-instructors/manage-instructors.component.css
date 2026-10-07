@@ -1,0 +1,18 @@
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 24px; align-items: start; }
+.form-card { max-width: none; margin: 0; padding: 24px; }
+.form-card h2 { font-size: 20px; margin-bottom: 14px; }
+@media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+.layout.single { grid-template-columns: 1fr; }
+mat-paginator { margin-top: 12px; border-radius: 12px; }
+.pill.ok { background: #e6f4ea; color: #1e7a34; }
+.pill.warn { background: #fff4e0; color: #9a5b00; }
+.num button + button { margin-left: 8px; }
+
+.sub { display: block; font-size: 12px; opacity: .7; margin-top: 2px; }
+.detail-row td { background: rgba(128, 128, 128, .07); }
+.detail dl { display: grid; grid-template-columns: 130px 1fr; gap: 8px 16px; margin: 8px 0; }
+.detail dt { font-weight: 600; opacity: .8; }
+.detail dd { margin: 0; }
+.detail dd.long { white-space: pre-wrap; line-height: 1.5; }
+.detail a { word-break: break-all; }
+.num button { margin-left: 8px; }

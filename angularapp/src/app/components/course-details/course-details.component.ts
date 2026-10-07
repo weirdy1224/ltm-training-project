@@ -10,7 +10,9 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
 import { CourseService } from '../../services/course.service';
 import { EnrollmentService } from '../../services/enrollment.service';
 import { ReviewService } from '../../services/review.service';
-import { ROLES } from '../../constant';
+import { VideoService } from '../../services/video.service';
+import { CourseVideo } from '../../models/video.model';
+import { ROLES, STORAGE } from '../../constant';
 /**
 * Course details page: summary band, price card with Add to Cart / Enroll, and the reviews of the course.
 *
@@ -28,8 +30,9 @@ export class CourseDetailsComponent implements OnInit {
   errorMessage = '';
   loaded = false;
   role: string | null;
-  enrolled = false; 
-  private myCustomerId = Number(localStorage.getItem('customerId'));
+  enrolled = false;
+  lessons: CourseVideo[] = [];
+  private myCustomerId = Number(localStorage.getItem(STORAGE.CUSTOMER_ID));
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -39,9 +42,23 @@ export class CourseDetailsComponent implements OnInit {
     private snack: MatSnackBar,
     private dialog: MatDialog,
     private enrollment: EnrollmentService,
-    private reviewService: ReviewService
+    private reviewService: ReviewService,
+    private videoService: VideoService
   ) {
     this.role = this.auth.getRole();
+  }
+  get myUserId(): number {
+    return Number(this.auth.getUserId());
+  }
+  get isInstructor(): boolean {
+    return this.role === ROLES.INSTRUCTOR;
+  }
+  /** Admins always, instructors only for their own course (the server also checks). */
+  get canManage(): boolean {
+    return this.role === ROLES.ADMIN || this.isInstructor;
+  }
+  get canWatchAny(): boolean {
+    return this.lessons.some(l => l.canWatch);
   }
   get isCustomer(): boolean {
     return this.role === ROLES.CUSTOMER;
@@ -53,6 +70,9 @@ export class CourseDetailsComponent implements OnInit {
         this.course = course;
         this.loaded = true;
         this.loadReviews(course.courseType || '');
+        if (course.courseId != null) {
+          this.videoService.list(course.courseId).subscribe({ next: (l) => (this.lessons = l || []), error: () => (this.lessons = []) });
+        }
         if (this.isCustomer && course.courseId != null) {
           this.enrollment.enrolledCourseIds().subscribe(ids => (this.enrolled = ids.has(course.courseId as number)));
         }
@@ -103,6 +123,7 @@ export class CourseDetailsComponent implements OnInit {
     });
   }
   back(): void {
-    this.router.navigate([this.role === ROLES.ADMIN ? '/view-courses' : '/customer-view-courses']);
+    const target = this.role === ROLES.ADMIN ? '/view-courses' : this.isInstructor ? '/instructor/courses' : '/customer-view-courses';
+    this.router.navigate([target]);
   }
 }
