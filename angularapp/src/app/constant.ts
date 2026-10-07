@@ -41,18 +41,13 @@ export const API = {
   OTP_STATUS: '/api/otp/status',
   OTP_SEND: '/api/otp/send',
   OTP_VERIFY: '/api/otp/verify',
-  // forgot password (direct reset: e-mail, then new password)
-  FORGOT_PASSWORD: '/api/forgot-password',
-  RESET_PASSWORD: '/api/reset-password',
 
   // instructors (Day 2)
   INSTRUCTOR_REGISTER: '/api/instructor/register',
   INSTRUCTOR_ME: '/api/instructor/me',
   INSTRUCTOR_COURSES: '/api/instructor/courses',
   VIDEO: '/api/video',
-  ADMIN_INSTRUCTORS: '/api/admin/instructors',
   UPLOAD_IMAGE: '/api/upload/image',
-  GOOGLE_LOGIN: '/api/auth/google',
   PAYMENT_RAZORPAY_ORDER: '/api/payment/razorpay/order',
   PAYMENT_RAZORPAY_VERIFY: '/api/payment/razorpay/verify',
   INVOICE: '/api/invoice',
@@ -68,7 +63,6 @@ export const API = {
   DASHBOARD_ADMIN: '/api/dashboard/admin',
   DASHBOARD_INSTRUCTOR: '/api/dashboard/instructor',
   // video lessons (Lokesh)
-  VIDEO: '/api/video',
   VIDEO_BY_COURSE: '/api/video/course',
   // cart (Shoryan)
   CART: '/api/cart',
