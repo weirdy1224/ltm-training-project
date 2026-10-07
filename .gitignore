@@ -107,3 +107,6 @@ karma/
 # Karma reports
 karma-coverage/
 coverage/
+
+
+uploads/

@@ -6,6 +6,7 @@ import { API,API_URL,STORAGE } from '../constant';
 import { Login } from '../models/login.model';
 import { User } from '../models/user.model';
 import { UserStoreService } from './user-store.service';
+import { environment } from 'src/environments/environment.prod';
 
 /**
  * Register, login, logout and session handling.
@@ -31,6 +32,21 @@ export class AuthService {
     this.userStore.restore();   // after a page reload, bring the user back from the saved token
   }
 
+  googleLogin(credential: string): Observable<any> {
+
+    return this.http.post<any>(
+      `${environment.apiUrl}/api/google-login`,
+      {
+        credential
+      },
+      {
+        withCredentials: true
+      }
+    ).pipe(
+      tap((res: any) => this.applySession(res))
+    );
+  }
+
   /** Public sign-up. The server always creates a CUSTOMER account. */
   register(user: User): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}${API.REGISTER}`, user);
@@ -39,6 +55,27 @@ export class AuthService {
   login(login: Login): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}${API.LOGIN}`, login, { withCredentials: true }).pipe(
       tap((res: any) => this.applySession(res))
+    );
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}${API.FORGOT_PASSWORD}`,
+      { email }
+    );
+  }
+
+  resetPassword(
+    token: string,
+    password: string
+  ): Observable<any> {
+  
+    return this.http.post<any>(
+      `${this.apiUrl}${API.RESET_PASSWORD}`,
+      {
+        token,
+        password
+      }
     );
   }
 
@@ -83,6 +120,7 @@ export class AuthService {
   }
 
   private applySession(res: any): void {
+    localStorage.setItem('username',res.username);
     localStorage.setItem(STORAGE.TOKEN, res.token);
     localStorage.setItem(STORAGE.ROLE, res.role);
     localStorage.setItem(STORAGE.USER_ID, String(res.userId));

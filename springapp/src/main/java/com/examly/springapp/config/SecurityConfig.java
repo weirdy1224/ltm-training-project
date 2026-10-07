@@ -109,21 +109,16 @@ public class SecurityConfig {
                                                 handlers))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                                .requestMatchers("/api/register", "/api/login", "/api/refresh",
-                                                                "/api/logout", "/api/health", "/api/auth/google",
-                                                                "/api/forgot-password", "/api/reset-password") // Google
-                                                                                                               // (Day
-                                                                                                               // 2),
-                                                                                                               // forgot
-                                                                                                               // password
-                                                .permitAll()
-
-                                                // Day 1: mobile OTP (the person is not logged in yet when they verify)
-                                                .requestMatchers("/api/otp/**").permitAll()
-                                                // Day 2: anyone may apply to become an instructor
-                                                .requestMatchers("/api/instructor/register").permitAll()
-                                                .requestMatchers("/api/instructor/register", "/api/instructor/status",
-                                                                "/api/instructor/resubmit")
+                                                .requestMatchers(
+                                                        "/api/register",
+                                                        "/api/login",
+                                                        "/api/refresh",
+                                                        "/api/logout",
+                                                        "/api/health",
+                                                        "/api/google-login",
+                                                        "/api/forgot-password",
+                                                        "/api/reset-password"
+                                                )
                                                 .permitAll()
 
                                                 // Day 3: the video bytes; the signed ticket in the address is checked
