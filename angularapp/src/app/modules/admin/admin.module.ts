@@ -23,4 +23,4 @@ const routes: Routes = [
   declarations: [AddCourseComponent, EditCourseComponent, ViewCoursesComponent, ViewOrdersComponent, ViewReviewComponent, ManageAdminsComponent],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })
-export class AdminModule {}
+export class AdminModule {} 

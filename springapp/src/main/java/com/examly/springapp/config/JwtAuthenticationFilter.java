@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter
 
             try {
 
-                if (jwtUtil.validateToken(token)) {
+                if (jwtUtil.validateToken(token)) { 
 
                     String email =
                             jwtUtil.extractEmail(token);
