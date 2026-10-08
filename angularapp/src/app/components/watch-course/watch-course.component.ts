@@ -25,8 +25,6 @@ export class WatchCourseComponent implements OnInit {
   current?: CourseVideo;
   src = '';
   loaded = false;
-  loadingVideo = false;
-  private retried = false;
   errorMessage = '';
   role: string | null;
 
@@ -68,16 +66,19 @@ export class WatchCourseComponent implements OnInit {
   }
 
   play(video: CourseVideo): void {
-    if (!video.canWatch || video.videoId === undefined) { return; }
-    if (this.current?.videoId !== video.videoId) { this.retried = false; }
+
+    if (!video.canWatch) {
+      return;
+    }
+  
     this.current = video;
-    this.src = '';
-    this.loadingVideo = true;
     this.errorMessage = '';
-    this.videoService.streamUrl(video.videoId).subscribe({
-      next: (url) => { this.src = url; this.loadingVideo = false; },
-      error: () => { this.loadingVideo = false; this.errorMessage = 'This lesson could not be opened.'; }
-    });
+  
+    this.src = video.videoUrl || '';
+  
+    if (!this.src) {
+      this.errorMessage = 'Video URL is missing.';
+    }
   }
 
   /** Plays the next lesson when one ends. */
@@ -89,12 +90,8 @@ export class WatchCourseComponent implements OnInit {
 
   /** The signed link expires after a while: ask for a fresh one when the player fails. */
   onPlayerError(): void {
-    if (this.current && this.src && !this.retried) {
-      this.retried = true;   // only once, so a broken file cannot cause an endless loop
-      this.play(this.current);
-    } else if (this.current) {
-      this.errorMessage = 'This lesson could not be played.';
-    }
+    this.errorMessage =
+      'This lesson could not be played.';
   }
 
   back(): void {
