@@ -72,6 +72,10 @@ export class ViewCoursesComponent implements OnInit {
     this.router.navigate(['/edit-course', course.courseId]);
   }
 
+  videos(course: Course): void {
+    this.router.navigate(['/manage-videos', course.courseId]);
+  }
+
   delete(course: Course): void {
     this.dialog.open(ConfirmDialogComponent, {
       data: {

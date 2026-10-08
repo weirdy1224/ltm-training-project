@@ -1,14 +1,258 @@
-.rating { margin: 4px 0 12px; }
-.rating-label { display: block; margin-bottom: 4px; color: var(--muted); font-size: 14px; }
-.stars-input { display: flex; gap: 2px; }
-.star { color: rgba(255,255,255,.22); }
-.star.on { color: #fbb92b; }
-.form-note.ok { background: rgba(52,211,153,.12); color: #34d399; }
-/* my reviews list (delete one of my own reviews) */
-.my-reviews { margin-top: 24px; }
-.my-reviews h2 { font-size: 22px; }
-.my-review { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
-.my-review:first-of-type { border-top: 0; }
-.my-review-body { flex: 1; min-width: 0; }
-.my-review-body p { margin: 6px 0 4px; color: var(--ink-2); overflow-wrap: anywhere; }
-.my-review .del-review { flex: none; }
+.page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+/* CARD */
+
+.form-card {
+    padding: 32px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .08);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, .2);
+    width: 1000px;
+}
+
+.review-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* HEADER */
+
+.card-head {
+    margin-bottom: 24px;
+}
+
+.card-head h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.card-head p {
+    margin-top: 8px;
+    color: #94a3b8;
+    line-height: 1.6;
+}
+
+/* FORM */
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+/* MATERIAL */
+
+::ng-deep .mat-mdc-text-field-wrapper {
+    background: rgba(255, 255, 255, .04) !important;
+    border-radius: 14px !important;
+}
+
+::ng-deep input,
+::ng-deep textarea {
+    color: #fff !important;
+}
+
+::ng-deep .mdc-floating-label {
+    color: #94a3b8 !important;
+}
+
+::ng-deep .mat-mdc-select-value {
+    color: #fff !important;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* RATING */
+
+.rating-card {
+    padding: 18px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.rating-label {
+    display: block;
+    margin-bottom: 12px;
+    color: #cbd5e1;
+    font-weight: 600;
+}
+
+.stars-input {
+    display: flex;
+    gap: 6px;
+}
+
+.star {
+    color: #64748b;
+}
+
+.star:hover {
+    color: #fbbf24;
+}
+
+.star.on {
+    color: #fbbf24;
+}
+
+.star mat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+}
+
+/* SUCCESS */
+
+.form-note.ok {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(34, 197, 94, .12);
+    border: 1px solid rgba(34, 197, 94, .25);
+    color: #86efac;
+}
+
+/* ERROR */
+
+.form-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(239, 68, 68, .12);
+    border: 1px solid rgba(239, 68, 68, .25);
+    color: #fca5a5;
+}
+
+.form-error.small {
+    margin-top: 10px;
+    padding: 10px 12px;
+}
+
+/* BUTTON */
+
+.form-actions {
+    margin-top: 8px;
+}
+
+.form-actions button {
+    width: 100%;
+    height: 52px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+/* MY REVIEWS */
+
+.my-reviews {
+    margin-top: 4px;
+}
+
+.review-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+
+    padding: 18px;
+
+    margin-top: 16px;
+
+    border-radius: 16px;
+
+    background: rgba(255, 255, 255, .04);
+
+    border: 1px solid rgba(255, 255, 255, .06);
+}
+
+.review-content {
+    flex: 1;
+}
+
+.review-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.review-content strong {
+    color: #fff;
+    font-size: 1rem;
+}
+
+.review-content p {
+    margin: 12px 0;
+    color: #cbd5e1;
+    line-height: 1.6;
+}
+
+.review-content small {
+    color: #94a3b8;
+}
+
+.del-review {
+    flex-shrink: 0;
+}
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #081020;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 20px;
+}
+
+/* MOBILE */
+
+@media(max-width:768px) {
+
+    .page {
+        padding: 24px 16px;
+    }
+
+    .form-card {
+        padding: 24px;
+    }
+
+    .card-head h2 {
+        font-size: 1.75rem;
+    }
+
+    .review-item {
+        flex-direction: column;
+    }
+
+    .review-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .del-review {
+        width: 100%;
+    }
+}

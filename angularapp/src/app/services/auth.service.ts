@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
+import { ApplicationStatus } from '../models/instructor-profile.model';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
-import { API,API_URL,STORAGE } from '../constant';
+import { API, API_URL, STORAGE } from '../constant';
 import { Login } from '../models/login.model';
 import { User } from '../models/user.model';
 import { UserStoreService } from './user-store.service';
@@ -31,14 +32,60 @@ export class AuthService {
     this.userStore.restore();   // after a page reload, bring the user back from the saved token
   }
 
-  /** Public sign-up. The server always creates a CUSTOMER account. */
+  googleLogin(credential: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}${API.GOOGLE_LOGIN}`,
+      { credential },
+      { withCredentials: true }
+    ).pipe(
+      tap((res: any) => this.applySession(res))
+    );
+  }
+
+  /** Public sign-up as a CUSTOMER or an INSTRUCTOR. The server emails a 6-digit OTP; the account works after verifyOtp. */
   register(user: User): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}${API.REGISTER}`, user);
+  }
+
+  /** Confirms the email address with the 6 digits from the email. */
+  verifyOtp(email: string, otp: string): Observable<{ message: string; role: string; approved: boolean }> {
+    return this.http.post<{ message: string; role: string; approved: boolean }>(`${this.apiUrl}${API.VERIFY_OTP}`, { email, otp });
+  }
+
+  /** Public: where is the instructor application of this email? (no login needed) */
+  applicationStatus(email: string): Observable<ApplicationStatus> {
+    return this.http.post<ApplicationStatus>(`${this.apiUrl}${API.INSTRUCTOR_APPLICATION_STATUS}`, { email });
+  }
+
+  /** Asks for a new OTP (the server waits about a minute between two mails). */
+  resendOtp(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}${API.RESEND_OTP}`, { email });
   }
 
   login(login: Login): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}${API.LOGIN}`, login, { withCredentials: true }).pipe(
       tap((res: any) => this.applySession(res))
+    );
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}${API.FORGOT_PASSWORD}`,
+      { email }
+    );
+  }
+
+  resetPassword(
+    token: string,
+    password: string
+  ): Observable<any> {
+  
+    return this.http.post<any>(
+      `${this.apiUrl}${API.RESET_PASSWORD}`,
+      {
+        token,
+        password
+      }
     );
   }
 
@@ -77,12 +124,13 @@ export class AuthService {
   }
 
   clearSession(): void {
-    [STORAGE.TOKEN, STORAGE.ROLE, STORAGE.USER_ID, STORAGE.CUSTOMER_ID, STORAGE.CART_ID, STORAGE.SESSION]
+    [STORAGE.TOKEN, STORAGE.ROLE, STORAGE.USER_ID, STORAGE.CUSTOMER_ID, STORAGE.CART_ID, STORAGE.USERNAME, STORAGE.SESSION]
       .forEach(k => localStorage.removeItem(k));
     this.userStore.clear();
   }
 
   private applySession(res: any): void {
+    localStorage.setItem(STORAGE.USERNAME, res.username);
     localStorage.setItem(STORAGE.TOKEN, res.token);
     localStorage.setItem(STORAGE.ROLE, res.role);
     localStorage.setItem(STORAGE.USER_ID, String(res.userId));

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtil {
     private static final String TYPE_ACCESS = "access";
+    private static final String TYPE_VIDEO = "video";
 
     private final Key key;
     private final long accessExpirationMs;
@@ -85,6 +86,37 @@ public class JwtUtil {
         return claims(token).get("username", String.class);
     }
 
+    /**
+     * Short-lived token that lets ONE video be streamed. A browser {@code <video>} tag cannot send an Authorization header,
+     * so the Angular app first asks (with its normal login token) for this token and puts it in the video URL.
+     * It carries typ = "video" so it can never be used as a login token, and a login token can never stream.
+     */
+    public String generateStreamToken(Long videoId, Long userId, long validMinutes) {
+        Date now = new Date();
+        return Jwts.builder()
+                .setSubject(String.valueOf(userId))
+                .claim("videoId", videoId)
+                .claim("typ", TYPE_VIDEO)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + validMinutes * 60_000L))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /** True when the token is a genuine, unexpired stream token for exactly this video. */
+    public boolean isValidStreamToken(String token, Long videoId) {
+        try {
+            Claims c = claims(token);
+            Object id = c.get("videoId");
+            return c.getExpiration().after(new Date())
+                    && TYPE_VIDEO.equals(c.get("typ", String.class))
+                    && id instanceof Number
+                    && ((Number) id).longValue() == videoId;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     public boolean isValid(String token) {
         try {
             Claims c = claims(token);
@@ -93,7 +125,9 @@ public class JwtUtil {
             return false;
         }
     }
+
     public boolean validateToken(String token) {
-        return isValid(token);
-        }
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'validateToken'");
+    }
 }

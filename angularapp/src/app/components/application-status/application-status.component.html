@@ -1,0 +1,38 @@
+<div class="page narrow">
+    <div class="page-head"><div><h2>Track my instructor application</h2><p>Enter the email you applied with to see where your application stands.</p></div></div>
+  
+    <form class="check-form" [formGroup]="form" (ngSubmit)="check()" novalidate>
+      <mat-form-field appearance="outline" class="grow">
+        <mat-label>Email used to apply</mat-label>
+        <mat-icon matPrefix>mail</mat-icon>
+        <input matInput id="statusEmail" type="email" formControlName="email" autocomplete="email" />
+        <mat-error *ngIf="f['email'].errors?.['required']">Email is required</mat-error>
+        <mat-error *ngIf="f['email'].errors?.['email']">Enter a valid email</mat-error>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" id="checkStatus" [disabled]="form.invalid || loading">{{ loading ? 'Checking...' : 'Check status' }}</button>
+    </form>
+  
+    <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+  
+    <section class="result" *ngIf="result" id="statusResult">
+      <ng-container *ngIf="result.status !== 'NOT_FOUND'; else notFound">
+        <ol class="steps">
+          <li *ngFor="let s of steps" [ngClass]="s.state">
+            <mat-icon>{{ s.state === 'done' ? 'check_circle' : s.state === 'current' ? 'hourglass_top' : 'radio_button_unchecked' }}</mat-icon>
+            <span>{{ s.label }}</span>
+          </li>
+        </ol>
+        <p class="msg">{{ result.message }}</p>
+        <p class="muted" *ngIf="result.submittedAt">Submitted on {{ result.submittedAt | date:'medium' }}</p>
+        <div class="actions">
+          <a mat-flat-button color="primary" routerLink="/verify-otp" [queryParams]="{ email: checkedEmail, type: 'instructor', reason: 'login' }" *ngIf="result.status === 'EMAIL_NOT_VERIFIED'">Enter my OTP</a>
+          <a mat-flat-button color="primary" routerLink="/login" *ngIf="result.status === 'APPROVED'">Log in</a>
+        </div>
+      </ng-container>
+      <ng-template #notFound>
+        <div class="empty small"><mat-icon>search_off</mat-icon><p>{{ result.message }}</p>
+          <a mat-flat-button color="primary" routerLink="/instructor-register">Apply as an instructor</a></div>
+      </ng-template>
+    </section>
+  </div>
+  

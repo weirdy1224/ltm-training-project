@@ -96,6 +96,14 @@
 
         </mat-form-field>
 
+        <div class="forgot-password">
+
+          <a routerLink="/forgot-password">
+            Forgot password?
+          </a>
+        
+        </div>
+
         <div
           class="form-error"
           *ngIf="errorMessage">
@@ -115,6 +123,15 @@
 
         </button>
 
+        <div class="divider">
+          <span>OR</span>
+        </div>
+        
+        <div
+          id="googleButton"
+          class="google-login">
+        </div>
+
       </form>
 
       <p class="alt">
@@ -123,6 +140,10 @@
         <a routerLink="/registration">
           Create Account
         </a>
+
+        <br>Instructor?
+        <a routerLink="/instructor-register">Apply here</a> &middot;
+        <a routerLink="/application-status">Track my application</a>
       </p>
 
     </div>

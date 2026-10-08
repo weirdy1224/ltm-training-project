@@ -1,79 +1,59 @@
-<div class="auth-page">
+<div class="auth">
 
-  <div class="aurora aurora-1"></div>
-  <div class="aurora aurora-2"></div>
-  <div class="aurora aurora-3"></div>
+  <!-- Left Side -->
 
-  <!-- LEFT SIDE -->
-
-  <section class="hero">
-
-    <span class="badge">
-      🚀 Start Learning Today
-    </span>
+  <section class="auth-hero">
 
     <h1>
-      Unlock Your
-      <span>Future Skills</span>
+      Begin Your Learning Journey
     </h1>
 
     <p>
-      Create your account and start learning modern technologies through structured courses and hands-on projects.
+      Learn in-demand skills, earn certificates, and grow your career through expertly designed courses.
     </p>
 
-    <div class="stats">
+    <ul>
+      <li>
+        <mat-icon>check_circle</mat-icon>
+        Access 250+ Premium Courses
+      </li>
 
-      <div>
-        <h3>250+</h3>
-        <span>Courses</span>
-      </div>
+      <li>
+        <mat-icon>check_circle</mat-icon>
+        Learn From Industry Experts
+      </li>
 
-      <div>
-        <h3>10K+</h3>
-        <span>Learners</span>
-      </div>
+      <li>
+        <mat-icon>check_circle</mat-icon>
+        Earn Course Certificates
+      </li>
 
-      <div>
-        <h3>97%</h3>
-        <span>Completion</span>
-      </div>
-
-      <div>
-        <h3>4.9★</h3>
-        <span>Rating</span>
-      </div>
-
-    </div>
-
-    <div class="floating floating-1">
-      Angular Mastery
-    </div>
-
-    <div class="floating floating-2">
-      Spring Boot Pro
-    </div>
-
-    <div class="floating floating-3">
-      AI Engineering
-    </div>
+      <li>
+        <mat-icon>check_circle</mat-icon>
+        Track Learning Progress
+      </li>
+    </ul>
 
   </section>
 
-  <!-- RIGHT SIDE -->
+  <!-- Right Side -->
 
-  <section class="auth-card-container">
+  <section class="auth-form">
 
-    <div class="glass-card">
+    <mat-card class="form-card">
 
       <h2>Create Account</h2>
 
       <p class="lead">
-        Join thousands of learners today.
+        Create your learner account and start exploring premium courses today.
       </p>
 
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+      <form
+        [formGroup]="registerForm"
+        (ngSubmit)="onSubmit()"
+        novalidate>
 
-        <!-- USERNAME -->
+        <!-- Username -->
 
         <mat-form-field appearance="outline">
 
@@ -83,14 +63,19 @@
             person
           </mat-icon>
 
-          <input matInput id="username" type="text" formControlName="username" autocomplete="username">
+          <input
+            matInput
+            id="username"
+            type="text"
+            formControlName="username"
+            autocomplete="username">
 
           <mat-error *ngIf="f['username'].errors?.['required']">
             Username is required
           </mat-error>
 
           <mat-error *ngIf="f['username'].errors?.['minlength']">
-            Username needs at least 3 characters
+            Username must contain at least 3 characters
           </mat-error>
 
           <mat-error *ngIf="f['username'].errors?.['spaces']">
@@ -99,17 +84,22 @@
 
         </mat-form-field>
 
-        <!-- EMAIL -->
+        <!-- Email -->
 
         <mat-form-field appearance="outline">
 
-          <mat-label>Email</mat-label>
+          <mat-label>Email Address</mat-label>
 
           <mat-icon matPrefix>
             mail
           </mat-icon>
 
-          <input matInput id="email" type="email" formControlName="email" autocomplete="email">
+          <input
+            matInput
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="email">
 
           <mat-error *ngIf="f['email'].errors?.['required']">
             Email is required
@@ -121,7 +111,7 @@
 
         </mat-form-field>
 
-        <!-- PASSWORD -->
+        <!-- Password -->
 
         <mat-form-field appearance="outline">
 
@@ -131,10 +121,19 @@
             lock
           </mat-icon>
 
-          <input matInput id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
-            autocomplete="new-password" (focus)="passwordFocused = true">
+          <input
+            matInput
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="new-password"
+            (focus)="passwordFocused = true">
 
-          <button mat-icon-button matSuffix type="button" (click)="showPassword = !showPassword">
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="showPassword = !showPassword">
 
             <mat-icon>
               {{ showPassword ? 'visibility_off' : 'visibility' }}
@@ -147,53 +146,57 @@
           </mat-error>
 
           <mat-error *ngIf="f['password'].errors?.['weak']">
-            Password does not meet all requirements
+            Password does not meet requirements
           </mat-error>
 
         </mat-form-field>
 
-        <!-- PASSWORD RULES -->
+        <!-- Password Rules -->
 
-        <div class="pw-card" *ngIf="passwordFocused || f['password'].value">
+        <ul
+          class="pw-rules"
+          *ngIf="passwordFocused || f['password'].value">
 
-          <div class="pw-title">
-            Password Requirements
-          </div>
+          <li
+            *ngFor="let c of passwordChecks"
+            [class.ok]="c.ok">
 
-          <ul class="pw-rules">
+            <mat-icon>
+              {{ c.ok ? 'check_circle' : 'radio_button_unchecked' }}
+            </mat-icon>
 
-            <li *ngFor="let c of passwordChecks" [class.ok]="c.ok">
+            {{ c.label }}
 
-              <mat-icon>
-                {{ c.ok ? 'check_circle' : 'radio_button_unchecked' }}
-              </mat-icon>
+          </li>
 
-              {{ c.label }}
+        </ul>
 
-            </li>
-
-          </ul>
-
-        </div>
-
-        <!-- CONFIRM PASSWORD -->
+        <!-- Confirm Password -->
 
         <mat-form-field appearance="outline">
 
-          <mat-label>Confirm Password</mat-label>
+          <mat-label>
+            Confirm Password
+          </mat-label>
 
           <mat-icon matPrefix>
             verified_user
           </mat-icon>
 
-          <input matInput id="confirmPassword" [type]="showPassword ? 'text' : 'password'"
-            formControlName="confirmPassword" autocomplete="new-password" [errorStateMatcher]="confirmMatcher">
+          <input
+            matInput
+            id="confirmPassword"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            autocomplete="new-password"
+            [errorStateMatcher]="confirmMatcher">
 
           <mat-error *ngIf="f['confirmPassword'].errors?.['required']">
             Confirm password is required
           </mat-error>
 
-          <mat-error *ngIf="!f['confirmPassword'].errors?.['required']
+          <mat-error
+            *ngIf="!f['confirmPassword'].errors?.['required']
             && registerForm.errors?.['mismatch']">
 
             Passwords do not match
@@ -202,17 +205,24 @@
 
         </mat-form-field>
 
-        <!-- MOBILE -->
+        <!-- Mobile Number -->
 
         <mat-form-field appearance="outline">
 
-          <mat-label>Mobile Number</mat-label>
+          <mat-label>
+            Mobile Number
+          </mat-label>
 
           <mat-icon matPrefix>
             phone
           </mat-icon>
 
-          <input matInput id="mobileNumber" type="text" inputmode="numeric" maxlength="10"
+          <input
+            matInput
+            id="mobileNumber"
+            type="text"
+            inputmode="numeric"
+            maxlength="10"
             formControlName="mobileNumber">
 
           <mat-error *ngIf="f['mobileNumber'].errors?.['required']">
@@ -220,14 +230,17 @@
           </mat-error>
 
           <mat-error *ngIf="f['mobileNumber'].errors?.['pattern']">
-            Enter a valid 10 digit mobile number starting with 6, 7, 8 or 9
+            Enter a valid 10 digit mobile number
           </mat-error>
 
         </mat-form-field>
 
-        <!-- ERROR -->
+        <!-- Error Message -->
 
-        <div class="form-error" role="alert" *ngIf="errorMessage">
+        <div
+          class="form-error"
+          role="alert"
+          *ngIf="errorMessage">
 
           <mat-icon>
             error_outline
@@ -237,9 +250,14 @@
 
         </div>
 
-        <!-- REGISTER BUTTON -->
+        <!-- Submit Button -->
 
-        <button mat-flat-button color="primary" class="login-btn" type="submit" id="registerButton"
+        <button
+          mat-raised-button
+          color="primary"
+          class="login-btn"
+          id="registerButton"
+          type="submit"
           [disabled]="registerForm.invalid || loading">
 
           {{ loading ? 'Creating Account...' : 'Create Account' }}
@@ -258,7 +276,7 @@
 
       </p>
 
-    </div>
+    </mat-card>
 
   </section>
 

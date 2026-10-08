@@ -1,0 +1,15 @@
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 24px; align-items: start; }
+@media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+.form-card { max-width: none; margin: 0; padding: 24px; }
+.form-card h2 { font-size: 20px; margin-bottom: 4px; }
+.small { font-size: 12.5px; }
+.file-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 12px; }
+.file-name { word-break: break-all; }
+.progress { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 12px; }
+.actions { white-space: nowrap; }
+.edit-row td { background: rgba(255, 255, 255, .03); }
+.edit-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.edit-form mat-form-field { flex: 1 1 220px; }
+.edit-form .order { flex: 0 0 110px; }
+.edit-form .wide { flex: 1 1 100%; }
+.edit-actions { display: flex; gap: 8px; }

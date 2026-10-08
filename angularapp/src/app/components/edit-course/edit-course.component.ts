@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CourseService } from '../../services/course.service';
 import { ImageUploadService } from '../../services/image-upload.service';
+import { AuthService } from '../../services/auth.service';
+import { ROLES } from '../../constant';
 @Component({
   selector: 'app-edit-course',
   templateUrl: './edit-course.component.html',
@@ -24,7 +26,8 @@ export class EditCourseComponent implements OnInit, OnDestroy {
     private router: Router,
     private courseService: CourseService,
     private snack: MatSnackBar,
-    private images: ImageUploadService
+    private images: ImageUploadService,
+    private auth: AuthService
   ) {
     this.courseForm = this.fb.group({
       courseType: ['', [Validators.required]],
@@ -34,7 +37,7 @@ export class EditCourseComponent implements OnInit, OnDestroy {
     });
   }
   get f() { return this.courseForm.controls; }
-  /** The admin picked a file: check it, show a preview at once, upload it, and keep the returned URL in the form. */
+  /** The user picked a file: check it, show a preview at once, upload it, and keep the returned URL in the form. */
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -75,11 +78,16 @@ export class EditCourseComponent implements OnInit, OnDestroy {
     if (this.courseForm.invalid || this.loading) { return; }
     this.loading = true;
     this.courseService.updateCourse(this.courseId, this.courseForm.value).subscribe({
-      next: () => { this.loading = false; this.snack.open('Course updated', 'OK', { duration: 3000 }); this.router.navigate(['/view-courses']); },
+      next: () => { this.loading = false; this.snack.open('Course updated', 'OK', { duration: 3000 }); this.router.navigate([this.listPath()]); },
       error: () => { this.loading = false; this.errorMessage = 'Could not update the course. Please try again.'; }
     });
   }
   cancel(): void {
-    this.router.navigate(['/view-courses']);
+    this.router.navigate([this.listPath()]);
+  }
+
+  /** Admins go back to the full course list, instructors to their own courses. */
+  private listPath(): string {
+    return this.auth.getRole() === ROLES.INSTRUCTOR ? '/instructor/courses' : '/view-courses';
   }
 }

@@ -12,10 +12,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Serves the uploaded course images at /uploads/** (read only, public, so the
- * browser can show them in an img tag).
- * The folder is set by app.upload.dir (default: "uploads" next to where the app
- * is started).
+ * Serves the uploaded course images at /uploads/** (read only, public, so the browser can show them in an img tag).
+ * The folder is set by app.upload.dir (default: "uploads" next to where the app is started).
  *
  * @author Team Lead
  */

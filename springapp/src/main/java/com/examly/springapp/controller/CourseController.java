@@ -3,6 +3,7 @@ package com.examly.springapp.controller;
 import com.examly.springapp.dto.CourseSearchRequest;
 import com.examly.springapp.dto.PageResponse;
 import com.examly.springapp.model.Course;
+import com.examly.springapp.service.AccessService;
 import com.examly.springapp.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -46,27 +47,31 @@ public class CourseController {
     private static final Logger log = LoggerFactory.getLogger(CourseController.class);
 
     private final CourseService courseService;
+    private final AccessService access;
 
     @Autowired
-    public CourseController(CourseService courseService) {
+    public CourseController(CourseService courseService, AccessService access) {
         this.courseService = courseService;
+        this.access = access;
     }
 
-    @Operation(summary = "Add a course", description = "ADMIN only.")
+    @Operation(summary = "Add a course", description = "ADMIN or INSTRUCTOR. A course added by an instructor belongs to that instructor.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Course created"),
             @ApiResponse(responseCode = "400", description = "Validation failed"),
             @ApiResponse(responseCode = "401", description = "Missing or invalid token"),
-            @ApiResponse(responseCode = "403", description = "Not an admin")
+            @ApiResponse(responseCode = "403", description = "Not an admin or instructor")
     })
     @PostMapping
     public ResponseEntity<Course> addCourse(@Valid @RequestBody Course course) {
         log.trace("addCourse called");
+        // the owner always comes from the login token, never from the request body
+        course.setInstructor(access.isInstructor() ? access.currentUser() : null);
         Course saved = courseService.addCourse(course);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    @Operation(summary = "List all courses", description = "ADMIN and CUSTOMER. Returns the plain list (no paging); use /search for paging.")
+    @Operation(summary = "List all courses", description = "ADMIN, INSTRUCTOR and CUSTOMER. Returns the plain list (no paging); use /search for paging.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "List of courses (may be empty)"),
             @ApiResponse(responseCode = "401", description = "Missing or invalid token")
@@ -77,6 +82,19 @@ public class CourseController {
         List<Course> courses = courseService.getAllCourses();
         log.debug("getAllCourses: returning {} course(s)", courses.size());
         return ResponseEntity.status(HttpStatus.OK).body(courses);
+    }
+
+    /** Declared before "/{courseId}": the literal path "mine" always wins over the variable path. */
+    @Operation(summary = "My courses", description = "INSTRUCTOR only. The courses the logged-in instructor owns, newest first.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "List of courses (may be empty)"),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid token"),
+            @ApiResponse(responseCode = "403", description = "Not an instructor")
+    })
+    @GetMapping("/mine")
+    public ResponseEntity<List<Course>> getMyCourses() {
+        log.trace("getMyCourses called");
+        return ResponseEntity.status(HttpStatus.OK).body(courseService.getCoursesByInstructor(access.currentUser().getUserId()));
     }
 
     /**
@@ -102,7 +120,7 @@ public class CourseController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @Operation(summary = "Update a course", description = "ADMIN only.")
+    @Operation(summary = "Update a course", description = "ADMIN, or the INSTRUCTOR who owns the course.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Course updated"),
             @ApiResponse(responseCode = "400", description = "Validation failed or invalid id"),
@@ -114,6 +132,7 @@ public class CourseController {
     public ResponseEntity<Course> updateCourse(@PathVariable @Min(value = 1, message = "must be a positive number") Long courseId,
                                                @Valid @RequestBody Course course) {
         log.trace("updateCourse called for courseId={}", courseId);
+        access.requireCourseManager(courseService.getCourseById(courseId));   // an instructor may only edit their own course
         return ResponseEntity.status(HttpStatus.OK).body(courseService.updateCourse(courseId, course));
     }
 
@@ -144,7 +163,7 @@ public class CourseController {
         return ResponseEntity.status(HttpStatus.OK).body(courseService.getCourseById(courseId));
     }
 
-    @Operation(summary = "Delete a course", description = "ADMIN only. The course is also removed from carts and orders.")
+    @Operation(summary = "Delete a course", description = "ADMIN, or the INSTRUCTOR who owns the course. The course is also removed from carts and orders, and its video lessons are deleted.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Course deleted"),
             @ApiResponse(responseCode = "400", description = "Invalid id"),
@@ -155,6 +174,7 @@ public class CourseController {
     @DeleteMapping("/{courseId}")
     public ResponseEntity<Void> deleteCourse(@PathVariable @Min(value = 1, message = "must be a positive number") Long courseId) {
         log.trace("deleteCourse called for courseId={}", courseId);
+        access.requireCourseManager(courseService.getCourseById(courseId));   // an instructor may only delete their own course
         courseService.deleteCourse(courseId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

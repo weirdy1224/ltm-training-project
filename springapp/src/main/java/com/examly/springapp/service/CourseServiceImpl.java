@@ -38,8 +38,11 @@ public class CourseServiceImpl implements CourseService {
     private final CartRepo cartRepo;
     private final OrderRepo orderRepo;
     private final ReviewRepo reviewRepo;
+    private final CourseVideoService videoService;
 
-    public CourseServiceImpl(CourseRepo courseRepo, CartRepo cartRepo, OrderRepo orderRepo, ReviewRepo reviewRepo) {
+    public CourseServiceImpl(CourseRepo courseRepo, CartRepo cartRepo, OrderRepo orderRepo, ReviewRepo reviewRepo,
+                             CourseVideoService videoService) {
+        this.videoService = videoService;
         this.courseRepo = courseRepo;
         this.cartRepo = cartRepo;
         this.orderRepo = orderRepo;
@@ -84,6 +87,13 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public List<Course> getCoursesByInstructor(Long instructorUserId) {
+        log.trace("getCoursesByInstructor entered for userId={}", instructorUserId);
+        return DatabaseOperationException.guard("loading courses",
+                () -> courseRepo.findByInstructor_UserIdOrderByCourseIdDesc(instructorUserId));
+    }
+
+    @Override
     @Transactional
     public void deleteCourse(Long courseId) {
         log.trace("deleteCourse entered for courseId={}", courseId);
@@ -112,6 +122,9 @@ public class CourseServiceImpl implements CourseService {
         }
         log.debug("deleteCourse: detached course {} from {} cart(s) and {} order(s), removed {} empty order(s)",
                 courseId, carts.size(), orders.size(), emptied);
+
+        // the video lessons (rows and files) go with the course
+        videoService.deleteAllForCourse(courseId);
 
         String type = course.getCourseType();
         DatabaseOperationException.guardVoid("deleting a course", () -> courseRepo.delete(course));
