@@ -1,13 +1,21 @@
 package com.examly.springapp.service;
 
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Collections;
+import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.examly.springapp.exception.AccountNotActiveException;
+import com.examly.springapp.model.Customer;
 import com.examly.springapp.model.User;
+import com.examly.springapp.repository.CustomerRepo;
 import com.examly.springapp.repository.UserRepo;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -15,11 +23,17 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
-import com.examly.springapp.model.Customer;
-import com.examly.springapp.repository.CustomerRepo;
-
+/**
+ * "Sign in with Google": checks the ID token with Google, then finds or creates the matching account.
+ * Safety rules: Google must say the email is verified; a new account gets a long RANDOM password
+ * (nobody knows it, so it cannot be used at /api/login); an instructor who is still waiting for admin
+ * approval cannot get in this way either.
+ *
+ * @author Lokesh
+ */
 @Service
 public class GoogleAuthService {
+    private static final Logger log = LoggerFactory.getLogger(GoogleAuthService.class);
 
     @Value("${google.client-id}")
     private String clientId;
@@ -27,6 +41,7 @@ public class GoogleAuthService {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
     private final CustomerRepo customerRepo;
+    private final SecureRandom random = new SecureRandom();
 
     public GoogleAuthService(
             UserRepo userRepo,
@@ -39,6 +54,10 @@ public class GoogleAuthService {
     }
 
     public User googleLogin(String idTokenString) throws Exception {
+        log.trace("googleLogin entered");
+        if (idTokenString == null || idTokenString.isBlank()) {
+            throw new BadCredentialsException("Invalid Google token");
+        }
 
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
                 new NetHttpTransport(),
@@ -56,7 +75,12 @@ public class GoogleAuthService {
 
         Payload payload = idToken.getPayload();
 
-        String email = payload.getEmail();
+        if (payload.getEmail() == null || !Boolean.TRUE.equals(payload.getEmailVerified())) {
+            log.warn("Google login refused: the Google email is missing or not verified");
+            throw new BadCredentialsException("Google email is not verified");
+        }
+
+        String email = payload.getEmail().trim().toLowerCase(Locale.ROOT);
 
         String name = (String) payload.get("name");
 
@@ -67,39 +91,60 @@ public class GoogleAuthService {
 
                     u.setEmail(email);
 
-                    u.setUsername(
-                            name != null && !name.isBlank()
-                                    ? name
-                                    : email.split("@")[0]);
+                    String username = name != null && !name.isBlank()
+                            ? name
+                            : email.split("@")[0];
+                    u.setUsername(username.length() > 50 ? username.substring(0, 50) : username);
 
                     u.setMobileNumber("0000000000");
 
                     u.setRole("CUSTOMER");
 
-                    u.setPassword(
-                            passwordEncoder.encode(
-                                    "GOOGLE_LOGIN_USER"));
+                    u.setPassword(passwordEncoder.encode(randomPassword()));
+
+                    u.setEmailVerified(Boolean.TRUE);
+                    u.setApproved(Boolean.TRUE);
 
                     return userRepo.save(u);
                 });
 
-        customerRepo
-                .findByUser_UserId(user.getUserId())
-                .orElseGet(() -> {
+        if (!user.hasBeenApproved()) {
+            throw new AccountNotActiveException(AccountNotActiveException.APPROVAL_PENDING,
+                    "Your instructor account is waiting for admin approval");
+        }
+        if (!user.hasVerifiedEmail()) {
+            // Google just proved the owner controls this address, so the OTP step is no longer needed
+            user.setEmailVerified(Boolean.TRUE);
+            user = userRepo.save(user);
+        }
 
-                    Customer customer = new Customer();
+        if ("CUSTOMER".equals(user.getRole())) {
+            final User owner = user;
+            customerRepo
+                    .findByUser_UserId(owner.getUserId())
+                    .orElseGet(() -> {
 
-                    customer.setCustomerName(
-                            user.getUsername());
+                        Customer customer = new Customer();
 
-                    customer.setInformation(
-                            "Signed in with Google");
+                        customer.setCustomerName(
+                                owner.getUsername());
 
-                    customer.setUser(user);
+                        customer.setInformation(
+                                "Signed in with Google");
 
-                    return customerRepo.save(customer);
-                });
+                        customer.setUser(owner);
+
+                        return customerRepo.save(customer);
+                    });
+        }
 
         return user;
+    }
+
+    /** 32 random bytes as text: far longer than anybody could guess, and different for every account. */
+    private String randomPassword() {
+        byte[] bytes = new byte[32];
+        random.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 }

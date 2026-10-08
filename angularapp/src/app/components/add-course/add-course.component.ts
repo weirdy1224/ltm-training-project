@@ -4,10 +4,12 @@ import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CourseService } from '../../services/course.service';
 import { ImageUploadService } from '../../services/image-upload.service';
+import { AuthService } from '../../services/auth.service';
+import { ROLES } from '../../constant';
 @Component({
   selector: 'app-add-course',
   templateUrl: './add-course.component.html',
-  styleUrls: ['./add-course.component.css']
+  styleUrls: ['./add-course.component.css'] 
 })
 export class AddCourseComponent implements OnDestroy {
   courseForm: FormGroup;
@@ -18,7 +20,7 @@ export class AddCourseComponent implements OnDestroy {
   uploadError = '';
   previewUrl = '';
   constructor(private fb: FormBuilder, private courseService: CourseService, private router: Router, private snack: MatSnackBar, private images:
-    ImageUploadService) {
+    ImageUploadService, private auth: AuthService) {
     this.courseForm = this.fb.group({
       courseType: ['', [Validators.required]],
       courseImageUrl: ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]],
@@ -27,7 +29,7 @@ export class AddCourseComponent implements OnDestroy {
     });
   }
   get f() { return this.courseForm.controls; }
-  /** The admin picked a file: check it, show a preview at once, upload it, and keep the returned URL in the form. */
+  /** The user picked a file: check it, show a preview at once, upload it, and keep the returned URL in the form. */
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -62,7 +64,17 @@ export class AddCourseComponent implements OnDestroy {
     this.loading = true;
     this.errorMessage = '';
     this.courseService.addCourse(this.courseForm.value).subscribe({
-      next: () => { this.loading = false; this.snack.open('Course added', 'OK', { duration: 3000 }); this.router.navigate(['/view-courses']); },
+      next: (course) => {
+        this.loading = false;
+        if (this.auth.getRole() === ROLES.INSTRUCTOR) {
+          // the next step for an instructor is adding the video lessons of the new course
+          this.snack.open('Course added. Now add its video lessons.', 'OK', { duration: 4000 });
+          this.router.navigate(['/instructor/videos', course.courseId]);
+          return;
+        }
+        this.snack.open('Course added', 'OK', { duration: 3000 });
+        this.router.navigate(['/view-courses']);
+      },
       error: () => { this.loading = false; this.errorMessage = 'Could not add the course. Please try again.'; }
     });
   }

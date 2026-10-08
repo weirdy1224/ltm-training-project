@@ -3,9 +3,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API,API_URL } from '../constant';
 import { User } from '../models/user.model';
+import { InstructorApplication } from '../models/instructor-profile.model';
 
 /**
- * Admin account management (list, add, remove admins). The token is added by the AuthInterceptor.
+ * Admin account management (list, add, remove admins; approve or reject instructors). The token is added by the AuthInterceptor.
  *
  * @author Suriya
  */
@@ -32,5 +33,19 @@ export class AdminService {
 
   deleteAdmin(userId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}${API.ADMIN_USERS}/${userId}`);
+  }
+
+  /** Every instructor account with its state (emailVerified / approved) and the details entered while registering. */
+  listInstructors(): Observable<InstructorApplication[]> {
+    return this.http.get<InstructorApplication[]>(`${this.apiUrl}${API.ADMIN_INSTRUCTORS}`);
+  }
+
+  approveInstructor(userId: number): Observable<User> {
+    return this.http.put<User>(`${this.apiUrl}${API.ADMIN_INSTRUCTORS}/${userId}/approve`, {});
+  }
+
+  /** Removes an instructor who has not been approved yet. */
+  rejectInstructor(userId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}${API.ADMIN_INSTRUCTORS}/${userId}`);
   }
 }

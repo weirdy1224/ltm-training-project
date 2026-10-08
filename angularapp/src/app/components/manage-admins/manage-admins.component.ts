@@ -46,7 +46,7 @@ export class ManageAdminsComponent implements OnInit {
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       mobileNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-      password: ['', [Validators.required, Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).{8,72}$/)]],
+      password: ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s])\S{8,72}$/)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: passwordsMatch });
   }

@@ -1,0 +1,54 @@
+<div class="otp-page">
+    <div class="otp-card">
+  
+      <ng-container *ngIf="!doneMessage">
+        <mat-icon class="hero-icon">mark_email_unread</mat-icon>
+        <h1>Verify your email</h1>
+        <p class="lead">Enter the 6-digit code we emailed you to activate your account.</p>
+  
+        <div class="info" role="status" *ngIf="infoMessage">{{ infoMessage }}</div>
+  
+        <form [formGroup]="form" (ngSubmit)="verify()" novalidate>
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput id="otpEmail" type="email" formControlName="email" autocomplete="email" />
+            <mat-icon matSuffix>mail</mat-icon>
+            <mat-error *ngIf="f['email'].errors?.['required']">Email is required</mat-error>
+            <mat-error *ngIf="f['email'].errors?.['email']">Enter a valid email address</mat-error>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline" class="otp-field">
+            <mat-label>6-digit OTP</mat-label>
+            <input matInput id="otpCode" formControlName="otp" inputmode="numeric" maxlength="7"
+              autocomplete="one-time-code" (input)="onOtpInput()" />
+            <mat-error *ngIf="f['otp'].errors?.['required']">OTP is required</mat-error>
+            <mat-error *ngIf="f['otp'].errors?.['pattern']">OTP must be exactly 6 digits</mat-error>
+          </mat-form-field>
+  
+          <div class="error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
+  
+          <button mat-flat-button color="primary" type="submit" id="verifyOtpButton"
+            [disabled]="form.invalid || loading">
+            {{ loading ? 'Verifying...' : 'Verify email' }}
+          </button>
+  
+          <button mat-stroked-button type="button" class="resend" id="resendOtpButton"
+            [disabled]="resending || cooldown > 0 || f['email'].invalid" (click)="resend()">
+            {{ resending ? 'Sending...' : (cooldown > 0 ? 'Resend OTP in ' + cooldown + 's' : 'Resend OTP') }}
+          </button>
+        </form>
+  
+        <a class="back-link" routerLink="/registration">Wrong email? Register again</a>
+      </ng-container>
+  
+      <ng-container *ngIf="doneMessage">
+        <mat-icon class="hero-icon ok">verified</mat-icon>
+        <h1>Email verified</h1>
+        <p class="lead" id="otpDone">{{ doneMessage }}</p>
+        <button mat-flat-button color="primary" type="button" id="trackApplication" *ngIf="isInstructor" (click)="goToStatus()">Track my application</button>
+        <button mat-flat-button color="primary" type="button" id="goToLogin" *ngIf="!isInstructor" (click)="goToLogin()">Go to login</button>
+      </ng-container>
+  
+    </div>
+  </div>
+  

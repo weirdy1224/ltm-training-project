@@ -54,7 +54,7 @@ export class RegistrationComponent {
       password: ['', [Validators.required, strongPassword]],
       confirmPassword: ['', [Validators.required]],
       mobileNumber: ['', [Validators.required, Validators.pattern(MOBILE_PATTERN)]],
-      role: ['Customer'] // fixed: public sign-up always creates a customer
+      role: ['CUSTOMER']   // this page is for learners; instructors apply on their own page
     }, { validators: passwordsMatch });
   }
   get f() { return this.registerForm.controls; }
@@ -69,7 +69,8 @@ export class RegistrationComponent {
     this.errorMessage = '';
     const { confirmPassword, ...user } = this.registerForm.value;
     this.auth.register(user).subscribe({
-      next: () => { this.loading = false; this.router.navigate(['/login']); },
+      // the server has emailed a 6-digit OTP: the next step is typing it
+      next: () => { this.loading = false; this.router.navigate(['/verify-otp'], { queryParams: { email: user.email } }); },
       error: (err) => {
         this.loading = false;
         if (err.status === 409) {
@@ -78,6 +79,9 @@ export class RegistrationComponent {
           this.errorMessage = 'Too many attempts. Please wait a minute and try again.';
         } else if (err.status === 400) {
           this.errorMessage = err.error?.message || 'Please check the entered details';
+        } else if (err.status === 502) {
+          // the account was saved but the mail could not be sent: the OTP page has a "Resend" button
+          this.router.navigate(['/verify-otp'], { queryParams: { email: user.email, mail: 'failed' } });
         } else {
           this.errorMessage = 'Registration failed. Please try again later.';
         }

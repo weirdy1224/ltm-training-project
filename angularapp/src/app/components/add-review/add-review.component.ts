@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
+import { STORAGE } from '../../constant';
 import { CartService } from '../../services/cart.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { Review } from '../../models/review.model';
@@ -16,7 +17,7 @@ export class AddReviewComponent implements OnInit {
   reviewForm: FormGroup;
   courseTypes: string[] = [];
   stars = [1, 2, 3, 4, 5];
-  customerId = localStorage.getItem('customerId') || '';
+  customerId = localStorage.getItem(STORAGE.CUSTOMER_ID) || '';
   message = '';
   errorMessage = '';
   loading = false;

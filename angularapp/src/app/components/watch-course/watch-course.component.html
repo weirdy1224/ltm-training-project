@@ -1,0 +1,34 @@
+<div class="page">
+    <div class="page-head">
+      <div><h2>{{ course?.courseType || 'Course' }}</h2><p>{{ current?.title || 'Video lessons' }}</p></div>
+      <div class="actions">
+        <a mat-stroked-button color="primary" *ngIf="canManage && course" [routerLink]="role === 'ADMIN' ? ['/manage-videos', course.courseId] : ['/instructor/videos', course.courseId]"><mat-icon>video_library</mat-icon>Manage lessons</a>
+        <button mat-stroked-button color="primary" (click)="back()"><mat-icon>arrow_back</mat-icon>Course details</button>
+      </div>
+    </div>
+    <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+    <div class="empty" *ngIf="loaded && videos.length === 0">
+      <mat-icon>videocam_off</mat-icon><h3>No video lessons yet</h3><p>The instructor has not added lessons to this course.</p>
+    </div>
+    <div class="empty" *ngIf="loaded && videos.length > 0 && !anyWatchable">
+      <mat-icon>lock</mat-icon><h3>Enroll to watch</h3><p>Lessons are available to learners who enrolled in this course.</p>
+      <a mat-flat-button color="primary" *ngIf="course" [routerLink]="['/course-details', course.courseId]">Go to course details</a>
+    </div>
+    <div class="layout" *ngIf="anyWatchable">
+      <section class="player">
+        <video *ngIf="src" id="coursePlayer" [src]="src" controls controlsList="nodownload" autoplay playsinline
+          (ended)="onEnded()" (error)="onPlayerError()"></video>
+        <div class="loading" *ngIf="loadingVideo"><mat-icon>hourglass_top</mat-icon>Loading lesson…</div>
+        <p class="desc" *ngIf="current?.description">{{ current?.description }}</p>
+      </section>
+      <aside class="lessons">
+        <h3>Lessons ({{ videos.length }})</h3>
+        <button type="button" class="lesson" *ngFor="let v of videos" [class.active]="v.videoId === current?.videoId"
+          [disabled]="!v.canWatch" (click)="play(v)">
+          <mat-icon>{{ v.canWatch ? (v.videoId === current?.videoId ? 'play_circle' : 'play_circle_outline') : 'lock' }}</mat-icon>
+          <span>{{ v.orderIndex }}. {{ v.title }}</span>
+        </button>
+      </aside>
+    </div>
+  </div>
+  
