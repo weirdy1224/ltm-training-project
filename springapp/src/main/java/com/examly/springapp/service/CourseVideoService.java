@@ -32,10 +32,4 @@ public interface CourseVideoService {
 
     /** Removes every lesson of a course (used when the course itself is deleted). No access check: the caller already did it. */
     void deleteAllForCourse(Long courseId);
-
-    /** A short-lived signed token that lets the caller stream this one video. AccessDeniedException when not allowed. */
-    String createStreamToken(Long videoId);
-
-    /** Checks the token and finds the file to stream. */
-    VideoFile openForStreaming(Long videoId, String token);
 }

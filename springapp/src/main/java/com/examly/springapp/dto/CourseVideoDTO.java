@@ -20,14 +20,23 @@ public class CourseVideoDTO {
     private long sizeBytes;
     private LocalDateTime uploadedAt;
     private boolean canWatch;
+    private String videoUrl;
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
 
     public CourseVideoDTO() {}
 
     /** Builds the DTO of a stored lesson for a caller who may or may not watch it. */
     public static CourseVideoDTO from(CourseVideo v, boolean canWatch) {
         CourseVideoDTO d = new CourseVideoDTO();
+    
         d.videoId = v.getVideoId();
-        d.courseId = v.getCourse() == null ? null : v.getCourse().getCourseId();
+        d.courseId = v.getCourse() == null
+                ? null
+                : v.getCourse().getCourseId();
+    
         d.title = v.getTitle();
         d.description = v.getDescription();
         d.orderIndex = v.getOrderIndex();
@@ -36,6 +45,8 @@ public class CourseVideoDTO {
         d.sizeBytes = v.getSizeBytes();
         d.uploadedAt = v.getUploadedAt();
         d.canWatch = canWatch;
+        d.videoUrl = v.getVideoUrl();
+    
         return d;
     }
 
