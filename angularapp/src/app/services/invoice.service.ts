@@ -14,7 +14,7 @@ import {
 export class InvoiceService {
 
   private apiUrl =
-  'https://8080-dabebdaeebcdadbbfacbafdfacaeaeacfdedbcbce.premiumproject.examly.io/api/invoice';
+  'https://8080-abcbaaaeacafecdadbbfacbafdfacaeaeacfdedbcbce.premiumproject.examly.io/api/invoice';
 
   constructor(
     private http: HttpClient
