@@ -107,17 +107,19 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(
-                                                                "/api/register",
-                                                                "/api/login",
-                                                                "/api/refresh",
-                                                                "/api/logout",
-                                                                "/api/health",
-                                                                "/api/google-login",
-                                                                "/api/forgot-password",
-                                                                "/api/reset-password",
-                                                                "/api/verify-otp",
-                                                                "/api/resend-otp",
-                                                                "/api/instructor-application/status")
+                                                        "/api/register",
+                                                        "/api/login",
+                                                        "/api/refresh",
+                                                        "/api/logout",
+                                                        "/api/health",
+                                                        "/api/google-login",
+                                                        "/api/forgot-password",
+                                                        "/api/reset-password",
+                                                        "/api/verify-otp",
+                                                        "/api/resend-otp",
+                                                        "/api/instructor-application/status",
+                                                        "/ws/**"
+                                                )
                                                 .permitAll()
                                                 // a <video> tag cannot send the Authorization header, so streaming is
                                                 // protected by
@@ -227,6 +229,7 @@ public class SecurityConfig {
                                                 // carts
                                                 .requestMatchers(HttpMethod.GET, "/api/cart").hasAuthority("ADMIN")
                                                 .requestMatchers("/api/cart", "/api/cart/**").hasAuthority("CUSTOMER")
+                                                .requestMatchers("/api/notifications", "/api/notifications/**").hasAnyAuthority("ADMIN", "INSTRUCTOR", "CUSTOMER")
                                                 .anyRequest().authenticated());
                 // filter order: request id -> rate limit -> JWT
                 http.addFilterBefore(new RateLimitFilter(rateLimiter, globalPerMinute, authPerMinute),
