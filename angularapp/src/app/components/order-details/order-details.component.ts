@@ -30,10 +30,10 @@ export class OrderDetailsComponent implements OnInit {
       return;
     }
   
-    this.invoiceService
+    this.invoiceService 
         .downloadInvoice(
           this.order.orderId
-        )
+        ) 
         .subscribe({
   
           next: (blob) => {
