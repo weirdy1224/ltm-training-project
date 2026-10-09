@@ -51,7 +51,7 @@ export class ViewCoursesComponent implements OnInit {
     this.courseService.searchCourses({ keyword: this.keyword.trim(), page: this.page, size: this.pageSize, sort: 'newest' }).subscribe({
       next: (res) => { this.courses = res.content || []; this.totalElements = res.totalElements || 0; this.loaded = true; },
       error: () => { this.errorMessage = 'Could not load courses.'; this.loaded = true; }
-    });
+    }); 
   }
 
   search(): void {

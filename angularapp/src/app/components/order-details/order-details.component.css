@@ -3,3 +3,11 @@
 tfoot td { padding: 16px; background: var(--surface-2); }
 .total-label { text-align: right; font-weight: 700; }
 .total { font: 800 20px var(--display); }
+.invoice-section {
+
+    margin-top: 20px;
+  
+    display: flex;
+  
+    justify-content: flex-end;
+  }

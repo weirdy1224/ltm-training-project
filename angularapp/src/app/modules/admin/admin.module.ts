@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SharedModule } from 'src/app/shared/shared/shared.module';
-import { ViewCoursesComponent } from '../../components/view-courses/view-courses.component';
+import { ViewCoursesComponent } from '../../components/view-courses/view-courses.component'; 
 import { ViewOrdersComponent } from '../../components/view-orders/view-orders.component';
 import { ViewReviewComponent } from '../../components/view-review/view-review.component';
 import { ConfirmDialogComponent } from 'src/app/components/confirm-dialog/confirm-dialog.component';
@@ -27,4 +27,4 @@ const routes: Routes = [
   declarations: [ViewCoursesComponent, ViewOrdersComponent, ViewReviewComponent, ManageAdminsComponent, ManageInstructorsComponent],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })
-export class AdminModule {}
+export class AdminModule {} 
