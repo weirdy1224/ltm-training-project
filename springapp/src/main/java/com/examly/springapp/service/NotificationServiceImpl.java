@@ -39,7 +39,7 @@ public class NotificationServiceImpl implements NotificationService {
     public long getUnreadCount(Long userId) {
         log.trace("getUnreadCount entered for userId={}", userId);
         return DatabaseOperationException.guard("counting unread notifications",
-                () -> notificationRepo.countByUserIdAndReadFalse(userId));
+                () -> notificationRepo.countByUserIdAndIsReadFalse(userId));
     }
 
     @Override

@@ -28,7 +28,7 @@ public class Notification {
     private NotificationType type;
 
     @Column(nullable = false)
-    private boolean read = false;
+    private boolean isRead = false;
 
     @Column(length = 500)
     private String redirectUrl;
@@ -46,7 +46,7 @@ public class Notification {
         this.message = message;
         this.type = type;
         this.redirectUrl = redirectUrl;
-        this.read = false;
+        this.isRead = false;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -91,11 +91,11 @@ public class Notification {
     }
 
     public boolean isRead() {
-        return read;
+        return isRead;
     }
 
-    public void setRead(boolean read) {
-        this.read = read;
+    public void setRead(boolean isRead) {
+        this.isRead = isRead;
     }
 
     public String getRedirectUrl() {
