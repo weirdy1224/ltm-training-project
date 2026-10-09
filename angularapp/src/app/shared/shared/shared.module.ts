@@ -9,6 +9,8 @@ import { AddCourseComponent } from '../../components/add-course/add-course.compo
 import { EditCourseComponent } from '../../components/edit-course/edit-course.component';
 import { ManageVideosComponent } from '../../components/manage-videos/manage-videos.component';
 
+import { RelativeTimePipe } from '../relative-time.pipe';
+
 /**
  * Things every lazy-loaded feature module needs: Angular common pieces, forms, router links,
  * Angular Material and the small shared components.
@@ -16,8 +18,8 @@ import { ManageVideosComponent } from '../../components/manage-videos/manage-vid
  * @author Team Lead
  */
 @NgModule({
-  declarations: [CourseCardComponent, StarRatingComponent, AddCourseComponent, EditCourseComponent, ManageVideosComponent],
+  declarations: [CourseCardComponent, StarRatingComponent, AddCourseComponent, EditCourseComponent, ManageVideosComponent, RelativeTimePipe],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, MaterialModule],
-  exports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, MaterialModule, CourseCardComponent, StarRatingComponent, AddCourseComponent, EditCourseComponent, ManageVideosComponent]
+  exports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, MaterialModule, CourseCardComponent, StarRatingComponent, AddCourseComponent, EditCourseComponent, ManageVideosComponent, RelativeTimePipe]
 })
 export class SharedModule {}

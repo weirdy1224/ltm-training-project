@@ -23,7 +23,7 @@ public class CrosConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 // .allowedOrigins(allowedOrigins)
                 .allowedOriginPatterns(allowedOrigins)
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("Authorization", "Content-Type", "X-Admin-Code", "X-Request-Id")
                 .exposedHeaders("Retry-After", "X-Request-Id")
                 .allowCredentials(true)

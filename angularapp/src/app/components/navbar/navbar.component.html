@@ -43,12 +43,35 @@
           title="My Profile"><mat-icon>account_circle</mat-icon><span class="sr-only">My Profile</span></a>
       </ng-container>
 
+      <!-- Bell Icon in Navbar (when logged in) -->
+      <button mat-icon-button class="icon-link notif-bell-btn" *ngIf="role"
+              [matMenuTriggerFor]="notifMenu" aria-label="Notifications" title="Notifications">
+        <mat-icon [matBadge]="(unreadCount$ | async) || 0"
+                  [matBadgeHidden]="((unreadCount$ | async) || 0) === 0"
+                  matBadgeColor="warn" matBadgeSize="small">
+          {{ ((unreadCount$ | async) || 0) > 0 ? 'notifications_active' : 'notifications' }}
+        </mat-icon>
+        <span class="sr-only">Notifications</span>
+      </button>
+
       <button mat-stroked-button color="primary" class="logout" id="logoutButton" *ngIf="role"
         (click)="askLogout()">Logout</button>
     </nav>
 
+    <!-- Mobile Bell button if logged in -->
+    <button mat-icon-button class="mobile-notif-btn" *ngIf="role"
+            [matMenuTriggerFor]="notifMenu" aria-label="Notifications" title="Notifications">
+      <mat-icon [matBadge]="(unreadCount$ | async) || 0"
+                [matBadgeHidden]="((unreadCount$ | async) || 0) === 0"
+                matBadgeColor="warn" matBadgeSize="small">
+        {{ ((unreadCount$ | async) || 0) > 0 ? 'notifications_active' : 'notifications' }}
+      </mat-icon>
+    </button>
+
     <button mat-icon-button class="compact" [matMenuTriggerFor]="menu"
       aria-label="Open menu"><mat-icon>menu</mat-icon></button>
+
+    <!-- Mobile Nav Menu -->
     <mat-menu #menu="matMenu">
       <ng-container *ngIf="!role">
         <a mat-menu-item routerLink="/">Home</a>
@@ -56,7 +79,6 @@
         <a mat-menu-item routerLink="/instructor-register">Become an Instructor</a>
         <a mat-menu-item routerLink="/application-status">Track Application</a>
         <a mat-menu-item routerLink="/login">Login</a>
-
       </ng-container>
       <ng-container *ngIf="role === 'ADMIN'">
         <a mat-menu-item routerLink="/dashboard">Home</a>
@@ -75,7 +97,6 @@
       <ng-container *ngIf="role === 'CUSTOMER'">
         <a mat-menu-item routerLink="/dashboard">Home</a>
         <a mat-menu-item routerLink="/customer-view-courses">Available Courses</a>
-        <!-- in the mat-menu: -->
         <a mat-menu-item routerLink="/ai-quiz">AI Quiz</a>
         <a mat-menu-item routerLink="/my-cart">My Cart</a>
         <a mat-menu-item routerLink="/my-orders">My Enrollments</a>
@@ -83,6 +104,74 @@
         <a mat-menu-item routerLink="/customer-profile">My Profile</a>
       </ng-container>
       <button mat-menu-item *ngIf="role" (click)="askLogout()">Logout</button>
+    </mat-menu>
+
+    <!-- Dropdown Notification Panel -->
+    <mat-menu #notifMenu="matMenu" class="notif-dropdown-menu" xPosition="before">
+      <div class="notif-panel" (click)="$event.stopPropagation()">
+        <div class="notif-header">
+          <div class="notif-header-left">
+            <span class="notif-header-title">Notifications</span>
+            <span class="notif-badge-pill" *ngIf="((unreadCount$ | async) || 0) > 0">
+              {{ unreadCount$ | async }} new
+            </span>
+          </div>
+          <button mat-button class="mark-all-btn"
+                  *ngIf="((unreadCount$ | async) || 0) > 0"
+                  (click)="markAllAsRead($event)">
+            <mat-icon class="mark-all-icon">done_all</mat-icon> Mark all read
+          </button>
+        </div>
+
+        <div class="notif-list-container">
+          <ng-container *ngIf="(notifications$ | async) as notifs">
+            <div *ngIf="notifs.length > 0; else noNotifs" class="notif-list">
+              <div *ngFor="let notif of notifs"
+                   class="notif-item"
+                   [class.unread]="!notif.read"
+                   (click)="onNotificationClick(notif)">
+                
+                <div class="notif-icon-box" [ngClass]="getTypeClass(notif.type)">
+                  <mat-icon>{{ getTypeIcon(notif.type) }}</mat-icon>
+                </div>
+
+                <div class="notif-info">
+                  <div class="notif-info-top">
+                    <span class="notif-title">{{ notif.title }}</span>
+                    <span class="notif-unread-dot" *ngIf="!notif.read"></span>
+                  </div>
+                  <p class="notif-desc">{{ notif.message }}</p>
+                  <div class="notif-time-row">
+                    <mat-icon class="clock-icon">schedule</mat-icon>
+                    <span class="notif-time">{{ notif.createdAt | relativeTime }}</span>
+                  </div>
+                </div>
+
+                <div class="notif-actions" (click)="$event.stopPropagation()">
+                  <button mat-icon-button class="action-btn mark-read" *ngIf="!notif.read"
+                          (click)="markAsRead($event, notif)" title="Mark as read" aria-label="Mark as read">
+                    <mat-icon>check_circle_outline</mat-icon>
+                  </button>
+                  <button mat-icon-button class="action-btn delete-notif"
+                          (click)="deleteNotification($event, notif)" title="Delete" aria-label="Delete notification">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #noNotifs>
+            <div class="notif-empty-state">
+              <div class="empty-icon-wrap">
+                <mat-icon>notifications_off</mat-icon>
+              </div>
+              <p class="empty-title">No notifications yet</p>
+              <p class="empty-sub">We'll alert you about course updates, enrollments, and lessons!</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
     </mat-menu>
   </div>
 </header>

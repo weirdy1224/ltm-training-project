@@ -22,7 +22,8 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
  * <ol>
  * <li>Swagger/OpenAPI documentation paths (public, with a relaxed
  * Content-Security-Policy so the UI can load)</li>
- * <li>The API itself (JWT, roles ADMIN / INSTRUCTOR / CUSTOMER, strict "default-src 'none'" policy)</li>
+ * <li>The API itself (JWT, roles ADMIN / INSTRUCTOR / CUSTOMER, strict
+ * "default-src 'none'" policy)</li>
  * </ol>
  * In the API chain the ORDER of the requestMatchers matters: the first match
  * wins, so specific rules come first.
@@ -116,10 +117,12 @@ public class SecurityConfig {
                                                         "/api/reset-password",
                                                         "/api/verify-otp",
                                                         "/api/resend-otp",
-                                                        "/api/instructor-application/status"
+                                                        "/api/instructor-application/status",
+                                                        "/ws/**"
                                                 )
                                                 .permitAll()
-                                                // a <video> tag cannot send the Authorization header, so streaming is protected by
+                                                // a <video> tag cannot send the Authorization header, so streaming is
+                                                // protected by
                                                 // the signed, short-lived token in the URL (checked in VideoController)
                                                 .requestMatchers(HttpMethod.GET, "/api/video/*/stream").permitAll()
                                                 // API documentation (normally served by the swagger chain above; listed
@@ -152,11 +155,14 @@ public class SecurityConfig {
                                                 .hasAnyAuthority("ADMIN", "CUSTOMER", "INSTRUCTOR")
                                                 .requestMatchers(HttpMethod.GET, "/api/course", "/api/course/**")
                                                 .hasAnyAuthority("ADMIN", "CUSTOMER", "INSTRUCTOR")
-                                                // add / edit / delete: admin, or an instructor (ownership is checked again in the controller)
+                                                // add / edit / delete: admin, or an instructor (ownership is checked
+                                                // again in the controller)
                                                 .requestMatchers("/api/course", "/api/course/**")
                                                 .hasAnyAuthority("ADMIN", "INSTRUCTOR")
-                                                // video lessons: managing needs admin or instructor (ownership checked in the service);
-                                                // watching also needs the course to be bought, which the service checks too
+                                                // video lessons: managing needs admin or instructor (ownership checked
+                                                // in the service);
+                                                // watching also needs the course to be bought, which the service checks
+                                                // too
                                                 .requestMatchers(HttpMethod.POST, "/api/video/course/*")
                                                 .hasAnyAuthority("ADMIN", "INSTRUCTOR")
                                                 .requestMatchers(HttpMethod.PUT, "/api/video/*")
@@ -188,6 +194,12 @@ public class SecurityConfig {
                                                 .hasAnyAuthority("ADMIN", "CUSTOMER")
                                                 .requestMatchers(HttpMethod.DELETE, "/api/order/**")
                                                 .hasAuthority("CUSTOMER")
+                                                // invoice
+                                                .requestMatchers(
+                                                                HttpMethod.GET,
+                                                                "/api/invoice/**")
+                                                .hasAuthority("CUSTOMER")
+
                                                 // reviews
                                                 .requestMatchers(HttpMethod.POST, "/api/review")
                                                 .hasAuthority("CUSTOMER")
@@ -217,6 +229,7 @@ public class SecurityConfig {
                                                 // carts
                                                 .requestMatchers(HttpMethod.GET, "/api/cart").hasAuthority("ADMIN")
                                                 .requestMatchers("/api/cart", "/api/cart/**").hasAuthority("CUSTOMER")
+                                                .requestMatchers("/api/notifications", "/api/notifications/**").hasAnyAuthority("ADMIN", "INSTRUCTOR", "CUSTOMER")
                                                 .anyRequest().authenticated());
                 // filter order: request id -> rate limit -> JWT
                 http.addFilterBefore(new RateLimitFilter(rateLimiter, globalPerMinute, authPerMinute),

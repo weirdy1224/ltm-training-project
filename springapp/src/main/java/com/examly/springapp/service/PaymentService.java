@@ -252,7 +252,7 @@ import com.razorpay.RazorpayClient;
 @Service
 public class PaymentService {
 
-    @Value("${razorpay.key.id}")
+    @Value("${razorpay.key.id}") 
     private String keyId;
 
     @Value("${razorpay.key.secret}")

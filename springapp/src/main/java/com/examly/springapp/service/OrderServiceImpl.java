@@ -10,6 +10,10 @@ import com.examly.springapp.model.Orders;
 import com.examly.springapp.repository.CourseRepo;
 import com.examly.springapp.repository.CustomerRepo;
 import com.examly.springapp.repository.OrderRepo;
+import com.examly.springapp.model.Enrollment;
+import com.examly.springapp.model.NotificationType;
+import com.examly.springapp.repository.EnrollmentRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,11 +36,16 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepo orderRepo;
     private final CustomerRepo customerRepo;
     private final CourseRepo courseRepo;
+    private final NotificationService notificationService;
+    private final EnrollmentRepository enrollmentRepository;
 
-    public OrderServiceImpl(OrderRepo orderRepo, CustomerRepo customerRepo, CourseRepo courseRepo) {
+    public OrderServiceImpl(OrderRepo orderRepo, CustomerRepo customerRepo, CourseRepo courseRepo,
+                            NotificationService notificationService, EnrollmentRepository enrollmentRepository) {
         this.orderRepo = orderRepo;
         this.customerRepo = customerRepo;
         this.courseRepo = courseRepo;
+        this.notificationService = notificationService;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     @Override
@@ -82,6 +91,51 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderPrice(total); // price is always computed on the server
         Orders saved = DatabaseOperationException.guard("saving an order", () -> orderRepo.save(order));
         log.info("Order {} created for customer {}", saved.getOrderId(), customerId);
+
+        // Notify student of course purchase & notify instructors of new student enrollment
+        for (Course c : courses) {
+            try {
+                // Secondary enrollment table record
+                Enrollment enrollment = new Enrollment();
+                enrollment.setUserId(customer.getUser() != null ? customer.getUser().getUserId() : customerId);
+                enrollment.setCourseId(c.getCourseId());
+                enrollment.setPurchaseDate(LocalDateTime.now());
+                enrollmentRepository.save(enrollment);
+            } catch (Exception ex) {
+                log.warn("Failed to create secondary enrollment row: {}", ex.getMessage());
+            }
+
+            try {
+                // 1. Notification for student: course purchase
+                if (customer.getUser() != null && customer.getUser().getUserId() != null) {
+                    notificationService.createNotification(
+                            customer.getUser().getUserId(),
+                            "Course Enrolled",
+                            "You have successfully purchased and enrolled in " + c.getCourseType() + ".",
+                            NotificationType.COURSE_PURCHASE,
+                            "/watch-course/" + c.getCourseId()
+                    );
+                }
+            } catch (Exception ex) {
+                log.warn("Failed to send student course purchase notification: {}", ex.getMessage());
+            }
+
+            try {
+                // 2. Notification for instructor: new student enrollment
+                if (c.getInstructor() != null && c.getInstructor().getUserId() != null) {
+                    notificationService.createNotification(
+                            c.getInstructor().getUserId(),
+                            "New Student Enrollment",
+                            customer.getCustomerName() + " has enrolled in your course \"" + c.getCourseType() + "\".",
+                            NotificationType.NEW_STUDENT_ENROLLMENT,
+                            "/instructor/courses"
+                    );
+                }
+            } catch (Exception ex) {
+                log.warn("Failed to send instructor enrollment notification: {}", ex.getMessage());
+            }
+        }
+
         return saved;
     }
 

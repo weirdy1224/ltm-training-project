@@ -13,9 +13,13 @@ import com.examly.springapp.repository.CourseRepo;
 import com.examly.springapp.repository.CourseVideoRepo;
 import com.examly.springapp.repository.CustomerRepo;
 import com.examly.springapp.repository.OrderRepo;
+import com.examly.springapp.model.NotificationType;
+import com.examly.springapp.model.Orders;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,15 +42,18 @@ public class CourseVideoServiceImpl implements CourseVideoService {
     private final CustomerRepo customerRepo;
     private final CloudinaryVideoStorageService storage;
     private final AccessService access;
+    private final NotificationService notificationService;
 
     public CourseVideoServiceImpl(CourseVideoRepo videoRepo, CourseRepo courseRepo, OrderRepo orderRepo,
-                                  CustomerRepo customerRepo, CloudinaryVideoStorageService storage, AccessService access) {
+                                  CustomerRepo customerRepo, CloudinaryVideoStorageService storage, AccessService access,
+                                  NotificationService notificationService) {
         this.videoRepo = videoRepo;
         this.courseRepo = courseRepo;
         this.orderRepo = orderRepo;
         this.customerRepo = customerRepo;
         this.storage = storage;
         this.access = access;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -124,7 +131,30 @@ public class CourseVideoServiceImpl implements CourseVideoService {
     
             CourseVideo saved =
                     videoRepo.save(video);
-    
+
+            // Notify all enrolled students (only when they are enrolled)
+            try {
+                List<Orders> orders = orderRepo.findByCourses_CourseId(courseId);
+                Set<Long> notifiedUsers = new HashSet<>();
+                Long currentUserId = access.currentUser().getUserId();
+                for (Orders order : orders) {
+                    if (order.getCustomer() != null && order.getCustomer().getUser() != null) {
+                        Long studentUserId = order.getCustomer().getUser().getUserId();
+                        if (studentUserId != null && !studentUserId.equals(currentUserId) && notifiedUsers.add(studentUserId)) {
+                            notificationService.createNotification(
+                                    studentUserId,
+                                    "New Video Lesson Added",
+                                    "A new lesson \"" + saved.getTitle() + "\" has been uploaded to \"" + course.getCourseType() + "\".",
+                                    NotificationType.VIDEO_UPLOAD,
+                                    "/watch-course/" + courseId
+                            );
+                        }
+                    }
+                }
+            } catch (Exception notifEx) {
+                log.warn("Failed to notify enrolled students about new video: {}", notifEx.getMessage());
+            }
+
             return CourseVideoDTO.from(
                     saved,
                     true

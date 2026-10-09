@@ -47,7 +47,7 @@ public class AdminSeeder implements ApplicationRunner {
         this.password = password;
         this.username = username;
         this.mobile = mobile;
-        this.resetPassword = resetPassword;
+        this.resetPassword = resetPassword; 
     }
 
     @Override
