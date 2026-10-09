@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.examly.springapp.model.NotificationType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -51,6 +52,7 @@ public class UserServiceImpl implements UserService {
     private final InstructorProfileRepo profileRepo;
     private final OtpService otpService;
     private final EmailService emailService;
+    private final NotificationService notificationService;
     /** The main admin from application.properties; this account can never be removed. */
     private final String mainAdminEmail;
     /** Compared against when the email is unknown so response time does not reveal which emails exist. */
@@ -58,6 +60,7 @@ public class UserServiceImpl implements UserService {
 
     public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, RefreshTokenRepo refreshTokenRepo,
                            EmailOtpRepo emailOtpRepo, InstructorProfileRepo profileRepo, OtpService otpService, EmailService emailService,
+                           NotificationService notificationService,
                            @Value("${app.admin.email}") String mainAdminEmail) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
@@ -66,6 +69,7 @@ public class UserServiceImpl implements UserService {
         this.profileRepo = profileRepo;
         this.otpService = otpService;
         this.emailService = emailService;
+        this.notificationService = notificationService;
         this.mainAdminEmail = mainAdminEmail.trim().toLowerCase(Locale.ROOT);
         this.dummyHash = passwordEncoder.encode("not-a-real-password-1");
     }
@@ -238,6 +242,36 @@ public class UserServiceImpl implements UserService {
         User saved = DatabaseOperationException.guard("approving an instructor", () -> userRepo.save(target));
         log.info("Instructor {} approved", userId);
         emailService.sendInstructorApprovedEmail(saved.getEmail(), saved.getUsername());
+
+        // Notify the approved instructor
+        try {
+            notificationService.createNotification(
+                    saved.getUserId(),
+                    "Instructor Application Approved",
+                    "Congratulations " + saved.getUsername() + "! Your instructor application has been approved. You can now access your instructor dashboard and create courses.",
+                    NotificationType.INSTRUCTOR_APPROVAL,
+                    "/instructor/dashboard"
+            );
+        } catch (Exception ex) {
+            log.warn("Failed to notify instructor of approval: {}", ex.getMessage());
+        }
+
+        // Notify admins
+        try {
+            List<User> admins = userRepo.findByRole("ADMIN");
+            for (User admin : admins) {
+                notificationService.createNotification(
+                        admin.getUserId(),
+                        "Instructor Application Approved",
+                        "Instructor account for " + saved.getUsername() + " (" + saved.getEmail() + ") was approved.",
+                        NotificationType.INSTRUCTOR_APPROVAL,
+                        "/manage-instructors"
+                );
+            }
+        } catch (Exception ex) {
+            log.warn("Failed to notify admins of instructor approval: {}", ex.getMessage());
+        }
+
         return saved;
     }
 
@@ -250,6 +284,25 @@ public class UserServiceImpl implements UserService {
             throw new InvalidRequestException("Only instructors who are waiting for approval can be rejected");
         }
         try {
+            // Notify admins of the rejection
+            try {
+                List<User> admins = userRepo.findByRole("ADMIN");
+                for (User admin : admins) {
+                    notificationService.createNotification(
+                            admin.getUserId(),
+                            "Instructor Application Rejected",
+                            "Instructor application for " + target.getUsername() + " (" + target.getEmail() + ") was rejected.",
+                            NotificationType.INSTRUCTOR_REJECTION,
+                            "/manage-instructors"
+                    );
+                }
+            } catch (Exception notifEx) {
+                log.warn("Failed to notify admins of rejection: {}", notifEx.getMessage());
+            }
+
+            // Clean up any notifications for this user before deleting the user entity
+            notificationService.deleteAllNotifications(userId);
+
             emailOtpRepo.deleteByUser_UserId(userId);
             profileRepo.deleteByUser_UserId(userId);
             refreshTokenRepo.deleteByUser_UserId(userId);

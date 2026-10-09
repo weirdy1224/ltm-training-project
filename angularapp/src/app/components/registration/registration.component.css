@@ -11,7 +11,7 @@ clamp(24px, 6vw, 88px); color: #e8ecf5; background: linear-gradient(160deg, #0d1
 .alt { margin: 18px 0 0; text-align: center; color: var(--muted); font-size: 14px; }
 @media (max-width: 860px) { .auth { grid-template-columns: 1fr; } .auth-hero { padding: 32px 22px; } .authhero ul { display: none; } .auth-hero h1 { max-width: none; } }
 /* live password checklist */
-.pw-rules { display: grid; gap: 6px; margin: 2px 0 14px; padding: 12px 14px; list-style: none; borderradius: 10px; background: var(--surface-2); border: 1px solid var(--line); }
+.pw-rules { display: grid; gap: 6px; margin: 2px 0 14px; padding: 12px 14px; list-style: none; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); }
 .pw-rules li { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13.5px; }
 .pw-rules li mat-icon { width: 18px; height: 18px; font-size: 18px; }
 .pw-rules li.ok { color: var(--ok); }
@@ -36,6 +36,6 @@ border-radius: 12px; }
 .link { border: 0; background: none; padding: 0; color: var(--gold-text); font-weight: 700; cursor:
 pointer; text-decoration: underline; text-underline-offset: 3px; }
 .link:disabled { color: var(--muted); text-decoration: none; cursor: default; }
-.done-icon { display: grid; place-items: center; width: 56px; height: 56px; margin: 0 0 14px; borderradius: 16px; background: rgba(52, 211, 153, .14); color: var(--ok); }
+.done-icon { display: grid; place-items: center; width: 56px; height: 56px; margin: 0 0 14px; border-radius: 16px; background: rgba(52, 211, 153, .14); color: var(--ok); }
 .done-icon mat-icon { font-size: 30px; width: 30px; height: 30px; }
 .go-login { margin-top: 8px; }
