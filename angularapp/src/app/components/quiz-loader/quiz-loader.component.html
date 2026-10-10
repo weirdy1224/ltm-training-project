@@ -1,0 +1,37 @@
+<ng-container *ngIf="quizService.state$ | async as state">
+    <!-- Show floating widget only when generating or when ready -->
+    <aside class="floating-quiz-banner" *ngIf="state.status === 'generating' || state.status === 'ready'" role="status" aria-live="polite">
+      
+      <!-- State 1: Generating in background -->
+      <div class="banner-body" *ngIf="state.status === 'generating'">
+        <div class="spinner-pulse">
+          <mat-icon class="pulse-icon">auto_awesome</mat-icon>
+        </div>
+        <div class="info">
+          <strong class="title">Generating AI Quiz...</strong>
+          <span class="desc">
+            {{ state.courseTitle || 'Your topic' }} &middot; {{ state.numQuestions }} questions
+          </span>
+          <span class="sub-desc">You can freely browse other pages</span>
+        </div>
+      </div>
+  
+      <!-- State 2: Ready notification badge -->
+      <div class="banner-body ready" *ngIf="state.status === 'ready'">
+        <mat-icon class="check-icon">check_circle</mat-icon>
+        <div class="info">
+          <strong class="title">Quiz Ready!</strong>
+          <span class="desc">{{ state.courseTitle || 'AI Quiz' }} is prepared</span>
+        </div>
+        <div class="actions">
+          <button mat-flat-button color="primary" class="btn-take" (click)="goToQuiz()">
+            Take Quiz
+          </button>
+          <button mat-icon-button (click)="dismiss()" title="Dismiss">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+  
+    </aside>
+  </ng-container>

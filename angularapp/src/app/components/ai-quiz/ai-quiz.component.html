@@ -9,8 +9,8 @@
   <p class="form-note" *ngIf="!aiEnabled">The AI is not switched on for this platform yet, so quizzes cannot be created.</p>
   <div class="form-error" role="alert" *ngIf="error"><mat-icon>error_outline</mat-icon>{{ error }}</div>
 
-  <!-- 1. setup -->
-  <section class="form-card setup" *ngIf="step === 'setup' || step === 'loading'">
+<!-- 1. setup -->
+<section class="form-card setup" *ngIf="step === 'setup' || step === 'loading'">
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="full">
       <mat-label>Course</mat-label>
       <mat-select id="quizCourse" name="course" [(ngModel)]="courseId" [disabled]="step === 'loading'">
@@ -38,8 +38,8 @@
     </button>
   </section>
 
-  <!-- 2. answering -->
-  <section *ngIf="(step === 'taking' || step === 'submitting') && quiz">
+<!-- 2. answering -->
+<section *ngIf="(step === 'taking' || step === 'submitting') && quiz">
     <div class="bar">
       <strong>{{ quiz.courseTitle }}</strong>
       <span class="muted">{{ quiz.difficulty | titlecase }} &middot; {{ answered }} of {{ quiz.questions.length }} answered</span>
@@ -64,8 +64,8 @@
     </div>
   </section>
 
-  <!-- 3. result -->
-  <section *ngIf="step === 'result' && result">
+<!-- 3. result -->
+<section *ngIf="step === 'result' && result">
     <div class="score form-card" id="quizScore">
       <div class="big">{{ result.score }}<small>/{{ result.total }}</small></div>
       <div>
@@ -94,8 +94,8 @@
     </div>
   </section>
 
-  <!-- history -->
-  <section class="history" *ngIf="history.length && (step === 'setup' || step === 'result')">
+<!-- history -->
+<section class="history" *ngIf="history.length && (step === 'setup' || step === 'result')">
     <h3>Your recent quizzes</h3>
     <ul>
       <li *ngFor="let h of history">
@@ -107,3 +107,4 @@
     </ul>
   </section>
 </div>
+
