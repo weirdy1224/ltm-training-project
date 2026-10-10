@@ -229,6 +229,8 @@ public class SecurityConfig {
                                                 // carts
                                                 .requestMatchers(HttpMethod.GET, "/api/cart").hasAuthority("ADMIN")
                                                 .requestMatchers("/api/cart", "/api/cart/**").hasAuthority("CUSTOMER")
+                                                // support tickets: customers and instructors raise and read their own (admins use /api/admin/tickets)
+                                                .requestMatchers("/api/tickets", "/api/tickets/**").hasAnyAuthority("CUSTOMER", "INSTRUCTOR")
                                                 .requestMatchers("/api/notifications", "/api/notifications/**").hasAnyAuthority("ADMIN", "INSTRUCTOR", "CUSTOMER")
                                                 .anyRequest().authenticated());
                 // filter order: request id -> rate limit -> JWT

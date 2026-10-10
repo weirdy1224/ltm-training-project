@@ -1,0 +1,44 @@
+<div class="page">
+    <ng-container *ngIf="userId === null; else userTickets">
+      <div class="page-head"><div><h2>Support tickets</h2><p>Every user who raised a ticket has a container. Open one to see that user's tickets.</p></div></div>
+      <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+      <div class="empty" *ngIf="loaded && !errorMessage && users.length === 0">
+        <mat-icon>confirmation_number</mat-icon><h3>No tickets yet</h3><p>Tickets raised by users will appear here.</p>
+      </div>
+      <div class="grid">
+        <a class="user-card" *ngFor="let u of users" [routerLink]="['/admin/tickets/user', u.userId]">
+          <div class="who">
+            <mat-icon>account_circle</mat-icon>
+            <div><strong>{{ u.username }}</strong><small>{{ u.email }} <span *ngIf="u.role">- {{ u.role | titlecase }}</span></small></div>
+          </div>
+          <div class="counts">
+            <span class="t-status open" *ngIf="u.open">{{ u.open }} open</span>
+            <span class="t-status pending" *ngIf="u.pending">{{ u.pending }} pending</span>
+            <span class="t-status resolved" *ngIf="u.resolved">{{ u.resolved }} resolved</span>
+            <span class="t-status closed" *ngIf="u.closed">{{ u.closed }} closed</span>
+          </div>
+          <small class="total">{{ u.total }} ticket{{ u.total === 1 ? '' : 's' }} - latest {{ u.lastTicketAt | date:'medium' }}</small>
+        </a>
+      </div>
+    </ng-container>
+  
+    <ng-template #userTickets>
+      <a class="back" routerLink="/admin/tickets"><mat-icon>arrow_back</mat-icon>All users</a>
+      <div class="page-head"><div><h2>Tickets of {{ username }}</h2><p>Open a ticket to read it and respond.</p></div></div>
+      <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+      <div class="empty" *ngIf="loaded && !errorMessage && tickets.length === 0">
+        <mat-icon>confirmation_number</mat-icon><h3>No tickets</h3><p>This user has not raised any ticket.</p>
+      </div>
+      <a class="ticket-row" *ngFor="let t of tickets" [routerLink]="['/admin/tickets', t.id]">
+        <div class="main">
+          <strong>{{ t.ticketCode }}</strong>
+          <span class="cat">{{ label(t.category) }}</span>
+          <p>{{ t.description }}</p>
+        </div>
+        <div class="side">
+          <span class="t-status" [ngClass]="t.status.toLowerCase()">{{ t.status }}</span>
+          <small>{{ t.createdAt | date:'medium' }}</small>
+        </div>
+      </a>
+    </ng-template>
+  </div>

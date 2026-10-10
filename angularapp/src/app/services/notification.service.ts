@@ -102,11 +102,8 @@ export class NotificationService implements OnDestroy {
 
   public markAllAsRead(): Observable<any> {
     return this.http.patch(`${API_URL}${API.NOTIFICATIONS_READ_ALL}`, {}).pipe(
-      tap(() => {
-        const list = this.notificationsSubject.value.map(n => ({ ...n, read: true }));
-        this.notificationsSubject.next(list);
-        this.unreadCountSubject.next(0);
-      })
+      // the server keeps unhandled ticket notifications unread, so ask it what is read now
+      tap(() => this.loadNotifications())
     );
   }
 
@@ -261,4 +258,3 @@ export class NotificationService implements OnDestroy {
     return `${wsScheme}//${host}/ws/notifications?${query}`;
   }
 }
-

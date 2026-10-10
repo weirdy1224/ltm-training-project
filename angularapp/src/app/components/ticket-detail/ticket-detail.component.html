@@ -1,0 +1,58 @@
+<div class="page narrow">
+    <a class="back" routerLink="/my-tickets"><mat-icon>arrow_back</mat-icon>All my tickets</a>
+    <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+    <p class="muted" *ngIf="loading">Loading...</p>
+  
+    <ng-container *ngIf="ticket">
+      <div class="page-head">
+        <div><h2>{{ ticket.ticketCode }}</h2><p>{{ label(ticket.category) }} - raised {{ ticket.createdAt | date:'medium' }}</p></div>
+        <span class="t-status big" id="ticketStatus" [ngClass]="ticket.status.toLowerCase()">{{ ticket.status }}</span>
+      </div>
+  
+      <section class="card">
+        <h3>Your request</h3>
+        <p class="text">{{ ticket.description }}</p>
+        <a *ngIf="ticket.screenshotUrl" [href]="ticket.screenshotUrl" target="_blank" rel="noopener noreferrer">
+          <img class="shot" [src]="ticket.screenshotUrl" alt="Screenshot attached to the ticket" />
+        </a>
+      </section>
+  
+      <section class="card" id="adminResponse">
+        <h3>Admin response</h3>
+        <p class="text" *ngIf="ticket.adminResponse">{{ ticket.adminResponse }}</p>
+        <p class="muted" *ngIf="!ticket.adminResponse && ticket.status === 'CLOSED'">The admin closed this ticket without a written response.</p>
+        <p class="muted" *ngIf="!ticket.adminResponse && (ticket.status === 'OPEN' || ticket.status === 'PENDING')">No response yet. You will get a notification when the admin replies.</p>
+        <small class="muted" *ngIf="ticket.respondedAt">{{ ticket.respondedAt | date:'medium' }}</small>
+      </section>
+  
+      <section class="card" *ngIf="canGiveFeedback" id="feedbackForm">
+        <h3>Was the response helpful?</h3>
+        <form [formGroup]="form" (ngSubmit)="sendFeedback()" novalidate>
+          <div class="rate">
+            <span id="rateLabel">Rate the response</span>
+            <div role="radiogroup" aria-labelledby="rateLabel">
+              <button type="button" class="star" *ngFor="let s of stars" role="radio" [attr.aria-checked]="form.value.rating === s" [attr.aria-label]="s + ' of 5'" [class.on]="s <= form.value.rating" (click)="setStars('rating', s)"><mat-icon>star</mat-icon></button>
+            </div>
+          </div>
+          <div class="rate">
+            <span id="useLabel">How useful was it?</span>
+            <div role="radiogroup" aria-labelledby="useLabel">
+              <button type="button" class="star" *ngFor="let s of stars" role="radio" [attr.aria-checked]="form.value.usefulness === s" [attr.aria-label]="s + ' of 5'" [class.on]="s <= form.value.usefulness" (click)="setStars('usefulness', s)"><mat-icon>star</mat-icon></button>
+            </div>
+          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>Comment (optional)</mat-label>
+            <textarea matInput formControlName="comment" rows="3" maxlength="1000"></textarea>
+          </mat-form-field>
+          <div class="form-error small" role="alert" *ngIf="feedbackError"><mat-icon>error_outline</mat-icon>{{ feedbackError }}</div>
+          <button mat-flat-button color="primary" type="submit" id="sendFeedback" [disabled]="form.invalid || sending">{{ sending ? 'Sending...' : 'Send feedback' }}</button>
+        </form>
+      </section>
+  
+      <section class="card" *ngIf="ticket.feedbackRating != null" id="feedbackDone">
+        <h3>Your feedback</h3>
+        <p>Rating: {{ ticket.feedbackRating }} / 5 &nbsp;&middot;&nbsp; Usefulness: {{ ticket.feedbackUsefulness }} / 5</p>
+        <p class="text" *ngIf="ticket.feedbackComment">{{ ticket.feedbackComment }}</p>
+      </section>
+    </ng-container>
+  </div>
