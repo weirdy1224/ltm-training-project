@@ -1,0 +1,21 @@
+<div class="page narrow">
+    <div class="page-head">
+      <div><h2>My tickets</h2><p>All the tickets you raised, with their current status.</p></div>
+      <a mat-flat-button color="primary" routerLink="/support"><mat-icon>add</mat-icon>Raise a ticket</a>
+    </div>
+    <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+    <div class="empty" *ngIf="loaded && !errorMessage && tickets.length === 0">
+      <mat-icon>confirmation_number</mat-icon><h3>No tickets yet</h3><p>Tickets you raise will appear here.</p>
+    </div>
+    <a class="ticket-row" *ngFor="let t of tickets" [routerLink]="['/my-tickets', t.id]">
+      <div class="main">
+        <strong>{{ t.ticketCode }}</strong>
+        <span class="cat">{{ label(t.category) }}</span>
+        <p>{{ t.description }}</p>
+      </div>
+      <div class="side">
+        <span class="t-status" [ngClass]="t.status.toLowerCase()">{{ t.status }}</span>
+        <small>{{ t.createdAt | date:'medium' }}</small>
+      </div>
+    </a>
+  </div>

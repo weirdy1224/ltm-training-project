@@ -83,7 +83,11 @@ export const API = {
   // notifications
   NOTIFICATIONS: '/api/notifications',
   NOTIFICATIONS_UNREAD_COUNT: '/api/notifications/unread-count',
-  NOTIFICATIONS_READ_ALL: '/api/notifications/read-all'
+  NOTIFICATIONS_READ_ALL: '/api/notifications/read-all',
+
+  // support tickets
+  TICKETS: '/api/tickets',
+  ADMIN_TICKETS: '/api/admin/tickets'
 };
 
 /** localStorage keys (the SRS keeps the JWT in localStorage). */

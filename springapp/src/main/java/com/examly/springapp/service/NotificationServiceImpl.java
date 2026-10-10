@@ -1,10 +1,13 @@
 package com.examly.springapp.service;
 
 import com.examly.springapp.exception.DatabaseOperationException;
+import com.examly.springapp.exception.InvalidRequestException;
 import com.examly.springapp.exception.ResourceNotFoundException;
 import com.examly.springapp.model.Notification;
 import com.examly.springapp.model.NotificationType;
+import com.examly.springapp.model.TicketStatus;
 import com.examly.springapp.repository.NotificationRepo;
+import com.examly.springapp.repository.TicketRepo;
 import com.examly.springapp.websocket.NotificationWebSocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -21,11 +25,22 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepo notificationRepo;
     private final NotificationWebSocketHandler webSocketHandler;
+    private final TicketRepo ticketRepo;
+
+    private static final Set<TicketStatus> UNHANDLED = Set.of(TicketStatus.OPEN, TicketStatus.PENDING);
 
     public NotificationServiceImpl(NotificationRepo notificationRepo,
-                                   NotificationWebSocketHandler webSocketHandler) {
+                                   NotificationWebSocketHandler webSocketHandler,
+                                   TicketRepo ticketRepo) {
         this.notificationRepo = notificationRepo;
         this.webSocketHandler = webSocketHandler;
+        this.ticketRepo = ticketRepo;
+    }
+
+    /** An admin's "ticket raised" notification stays unread until the ticket is resolved or closed. */
+    private boolean isLockedByTicket(Notification n) {
+        return n.getType() == NotificationType.TICKET_RAISED && n.getTicketId() != null
+                && ticketRepo.existsByIdAndStatusIn(n.getTicketId(), UNHANDLED);
     }
 
     @Override
@@ -50,6 +65,9 @@ public class NotificationServiceImpl implements NotificationService {
                 () -> notificationRepo.findByIdAndUserId(notificationId, userId))
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found with id " + notificationId));
 
+        if (isLockedByTicket(notification)) {
+            throw new InvalidRequestException("This ticket is still open or pending. It can be marked as read once the ticket is resolved or closed.");
+        }
         if (!notification.isRead()) {
             notification.setRead(true);
             return DatabaseOperationException.guard("updating notification read state",
@@ -62,8 +80,13 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void markAllAsRead(Long userId) {
         log.trace("markAllAsRead entered for userId={}", userId);
-        DatabaseOperationException.guard("marking all notifications as read",
-                () -> notificationRepo.markAllAsRead(userId));
+        // unhandled ticket notifications stay unread, everything else is marked
+        DatabaseOperationException.guard("marking all notifications as read", () -> {
+            List<Notification> unread = notificationRepo.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                    .filter(n -> !n.isRead() && !isLockedByTicket(n)).toList();
+            unread.forEach(n -> n.setRead(true));
+            return notificationRepo.saveAll(unread);
+        });
     }
 
     @Override
@@ -89,8 +112,15 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public Notification createNotification(Long userId, String title, String message, NotificationType type, String redirectUrl) {
+        return createNotification(userId, title, message, type, redirectUrl, null);
+    }
+
+    @Override
+    @Transactional
+    public Notification createNotification(Long userId, String title, String message, NotificationType type, String redirectUrl, Long ticketId) {
         log.trace("createNotification entered for userId={}, type={}", userId, type);
         Notification notification = new Notification(userId, title, message, type, redirectUrl);
+        notification.setTicketId(ticketId);
         notification.setCreatedAt(LocalDateTime.now());
         notification.setRead(false);
 
@@ -122,4 +152,3 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 }
-

@@ -1,0 +1,186 @@
+/* ---------- Admin: user cards + ticket list (matches theme.scss: dark surfaces, amber primary, indigo accent) ---------- */
+
+.back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    text-decoration: none;
+    color: #a0a8fb; /* indigo accent */
+    font-weight: 600;
+    transition: color .2s ease;
+  }
+  
+  .back:hover {
+    color: #fbbf24; /* amber on hover */
+  }
+  
+  .back .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+  
+  /* ---------- User cards ---------- */
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  
+  .user-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--ink, #f1f5f9);
+    background: var(--surface, #131c2e);
+    border: 1px solid var(--line, rgba(255, 255, 255, .09));
+    border-radius: var(--radius, 16px);
+    padding: 18px;
+    box-shadow: var(--shadow, 0 4px 15px rgba(0, 0, 0, .35));
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  
+  .user-card:hover,
+  .user-card:focus-visible {
+    border-color: rgba(251, 191, 36, .45); /* amber highlight */
+    box-shadow: var(--shadow-hover, 0 6px 20px rgba(245, 158, 11, .22));
+    transform: translateY(-1px);
+  }
+  
+  .user-card:focus-visible {
+    outline: 2px solid #7b83f5; /* indigo accent focus ring */
+    outline-offset: 2px;
+  }
+  
+  .who {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  
+  .who .mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: var(--gold-text, #fbbf24);
+    flex: none;
+  }
+  
+  .who div {
+    min-width: 0;
+  }
+  
+  .who strong,
+  .who small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .who strong {
+    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    font-weight: 700;
+    color: var(--ink, #f1f5f9);
+  }
+  
+  .who small,
+  .total {
+    color: var(--muted, #94a3b8);
+    font-weight: 400;
+    font-size: 13px;
+  }
+  
+  .counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  /* ---------- Ticket list ---------- */
+  
+  .ticket-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    text-decoration: none;
+    color: var(--ink, #f1f5f9);
+    background: var(--surface, #131c2e);
+    border: 1px solid var(--line, rgba(255, 255, 255, .09));
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow, 0 4px 15px rgba(0, 0, 0, .35));
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  
+  .ticket-row:hover,
+  .ticket-row:focus-visible {
+    border-color: rgba(251, 191, 36, .45);
+    box-shadow: var(--shadow-hover, 0 6px 20px rgba(245, 158, 11, .22));
+    transform: translateY(-1px);
+  }
+  
+  .ticket-row:focus-visible {
+    outline: 2px solid #7b83f5;
+    outline-offset: 2px;
+  }
+  
+  .main {
+    min-width: 0;
+  }
+  
+  .main strong {
+    margin-right: 10px;
+    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    font-weight: 700;
+    color: var(--ink, #f1f5f9);
+  }
+  
+  .cat {
+    color: var(--muted, #94a3b8);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  
+  .main p {
+    margin: 6px 0 0;
+    color: var(--ink-2, #cbd5e1);
+    font-weight: 400;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  }
+  
+  .side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  
+  .side small {
+    color: var(--muted, #94a3b8);
+    font-weight: 400;
+  }
+  
+  @media (max-width: 560px) {
+    .ticket-row {
+      flex-direction: column;
+    }
+  
+    .side {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }

@@ -1,0 +1,86 @@
+/* ---------- Support / FAQ page (matches theme.scss: dark surfaces, amber primary, indigo accent) ---------- */
+
+.page-head {
+    align-items: center;
+  }
+  
+  .faq {
+    margin-bottom: 28px;
+  }
+  
+  .faq h3 {
+    margin-bottom: 12px;
+    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 700;
+    color: var(--ink, #f1f5f9);
+  }
+  
+  .faq-item {
+    background: var(--surface, #131c2e);
+    border: 1px solid var(--line, rgba(255, 255, 255, .09));
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  
+  .faq-item:hover {
+    border-color: rgba(251, 191, 36, .35);
+  }
+  
+  .faq-item.open {
+    border-color: rgba(245, 158, 11, .4);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, .12);
+  }
+  
+  .faq-q {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    background: none;
+    border: 0;
+    color: var(--ink, #f1f5f9);
+    font: inherit;
+    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+  }
+  
+  .faq-q:hover {
+    background: var(--surface-2, #1a2540);
+  }
+  
+  .faq-item.open .faq-q {
+    color: #fbbf24; /* amber highlight for the open question */
+  }
+  
+  .faq-q:focus-visible {
+    outline: 2px solid #7b83f5; /* indigo accent focus ring */
+    outline-offset: -2px;
+  }
+  
+  .faq-a {
+    margin: 0;
+    padding: 0 16px 16px;
+    color: var(--ink-2, #94a3b8);
+    font-family: Inter, "Segoe UI", system-ui, sans-serif;
+    line-height: 1.6;
+  }
+  
+  .ticket-form {
+    max-width: none;
+    margin: 0;
+  }
+  
+  .ticket-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }

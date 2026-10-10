@@ -1,0 +1,65 @@
+<div class="page narrow">
+    <div class="page-head">
+      <div><h2>Help and support</h2><p>Check the common issues first. If none of them matches your problem, raise a ticket and an admin will answer it.</p></div>
+      <a mat-stroked-button color="primary" routerLink="/my-tickets" id="viewMyTickets"><mat-icon>confirmation_number</mat-icon>My tickets</a>
+    </div>
+  
+    <section class="faq" aria-label="Common issues">
+      <h3>Common issues</h3>
+      <div class="faq-item" *ngFor="let item of faqs; let i = index" [class.open]="openIndex === i">
+        <button type="button" class="faq-q" [attr.aria-expanded]="openIndex === i" [attr.aria-controls]="'faq-a-' + i" (click)="toggle(i)">
+          <span>{{ item.q }}</span><mat-icon>{{ openIndex === i ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+        <p class="faq-a" [id]="'faq-a-' + i" *ngIf="openIndex === i">{{ item.a }}</p>
+      </div>
+    </section>
+  
+    <section class="form-card ticket-form" aria-label="Raise a ticket">
+      <h2>Still need help? Raise a ticket</h2>
+      <p class="lead">Describe the problem and we will notify you as soon as an admin responds.</p>
+  
+      <div class="form-note ok" role="status" *ngIf="created">
+        Ticket <strong>{{ created.ticketCode }}</strong> was raised. <a [routerLink]="['/my-tickets', created.id]">Open ticket</a>
+      </div>
+      <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+  
+      <form [formGroup]="form" (ngSubmit)="submit(fileInput)" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>Your user id</mat-label>
+          <input matInput id="ticketUserId" formControlName="userId" readonly />
+          <mat-hint>Filled in from your account</mat-hint>
+        </mat-form-field>
+  
+        <mat-form-field appearance="outline">
+          <mat-label>Problem category</mat-label>
+          <mat-select id="ticketCategory" formControlName="category" required>
+            <mat-option *ngFor="let c of categories" [value]="c.value">{{ c.label }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="f['category'].errors?.['required']">Please choose a category</mat-error>
+        </mat-form-field>
+  
+        <mat-form-field appearance="outline">
+          <mat-label>Describe your problem</mat-label>
+          <textarea matInput id="ticketDescription" formControlName="description" rows="6" maxlength="2000"></textarea>
+          <mat-hint align="end">{{ f['description'].value?.length || 0 }} / 2000</mat-hint>
+          <mat-error *ngIf="f['description'].errors?.['required']">Please describe the problem</mat-error>
+          <mat-error *ngIf="f['description'].errors?.['minlength']">Please write at least 10 characters</mat-error>
+        </mat-form-field>
+  
+        <div class="upload">
+          <div class="upload-row">
+            <button type="button" mat-stroked-button (click)="fileInput.click()"><mat-icon>attach_file</mat-icon>Attach screenshot (optional)</button>
+            <button type="button" mat-button *ngIf="screenshot" (click)="removeFile(fileInput)">Remove</button>
+            <span class="upload-hint">PNG, JPG, GIF or WEBP, up to 5 MB</span>
+          </div>
+          <input #fileInput id="ticketScreenshot" type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden (change)="onFile($event)" />
+          <div class="form-error small" role="alert" *ngIf="fileError"><mat-icon>error_outline</mat-icon>{{ fileError }}</div>
+          <div class="img-preview" *ngIf="previewUrl"><img [src]="previewUrl" alt="Screenshot preview" /></div>
+        </div>
+  
+        <div class="form-actions">
+          <button mat-flat-button color="primary" type="submit" id="raiseTicket" [disabled]="form.invalid || submitting">{{ submitting ? 'Raising...' : 'Raise ticket request' }}</button>
+        </div>
+      </form>
+    </section>
+  </div>

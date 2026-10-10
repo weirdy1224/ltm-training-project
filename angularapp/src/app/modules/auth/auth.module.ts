@@ -7,6 +7,7 @@ import { ForgotPasswordComponent } from '../../components/forgot-password/forgot
 import { VerifyOtpComponent } from '../../components/verify-otp/verify-otp.component';
 import { InstructorRegisterComponent } from '../../components/instructor-register/instructor-register.component';
 import { ApplicationStatusComponent } from '../../components/application-status/application-status.component';
+import { InstructorHubComponent } from '../../components/instructor-hub/instructor-hub.component';
 import { ResetPasswordComponent } from '../../components/reset-password/reset-password.component';
 
 const routes: Routes = [
@@ -17,6 +18,10 @@ const routes: Routes = [
   {
     path: 'registration',
     component: RegistrationComponent
+  },
+  {
+    path: 'instructor-hub',
+    component: InstructorHubComponent
   },
   {
     path: 'instructor-register',
@@ -42,7 +47,7 @@ const routes: Routes = [
 
 /** Login, registration, email OTP and password reset. Lazy loaded: nobody needs this code until they open the login page. @author Suriya */
 @NgModule({
-  declarations: [LoginComponent, RegistrationComponent, VerifyOtpComponent, ForgotPasswordComponent, ResetPasswordComponent, InstructorRegisterComponent, ApplicationStatusComponent],
+  declarations: [LoginComponent, RegistrationComponent, VerifyOtpComponent, ForgotPasswordComponent, ResetPasswordComponent, InstructorRegisterComponent, ApplicationStatusComponent, InstructorHubComponent],
   imports: [SharedModule, RouterModule.forChild(routes)]
 })
 export class AuthModule {} 

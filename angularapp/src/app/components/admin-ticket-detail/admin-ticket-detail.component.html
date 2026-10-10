@@ -1,0 +1,48 @@
+<div class="page narrow">
+    <a class="back" [routerLink]="ticket ? ['/admin/tickets/user', ticket.userId] : ['/admin/tickets']"><mat-icon>arrow_back</mat-icon>Back to tickets</a>
+    <div class="form-error" role="alert" *ngIf="errorMessage"><mat-icon>error_outline</mat-icon>{{ errorMessage }}</div>
+    <p class="muted" *ngIf="loading">Loading...</p>
+  
+    <ng-container *ngIf="ticket">
+      <div class="page-head">
+        <div><h2>{{ ticket.ticketCode }}</h2><p>{{ label(ticket.category) }} - raised {{ ticket.createdAt | date:'medium' }}</p></div>
+        <span class="t-status big" id="ticketStatus" [ngClass]="ticket.status.toLowerCase()">{{ ticket.status }}</span>
+      </div>
+  
+      <section class="card">
+        <h3>Raised by</h3>
+        <p class="who">{{ ticket.username }} <span class="muted">(user id {{ ticket.userId }}<span *ngIf="ticket.email"> - {{ ticket.email }}</span>)</span></p>
+        <h3>Description</h3>
+        <p class="text">{{ ticket.description }}</p>
+        <a *ngIf="ticket.screenshotUrl" [href]="ticket.screenshotUrl" target="_blank" rel="noopener noreferrer">
+          <img class="shot" [src]="ticket.screenshotUrl" alt="Screenshot attached to the ticket" />
+        </a>
+      </section>
+  
+      <section class="card" *ngIf="!answered">
+        <h3>Your response</h3>
+        <p class="muted">Write a response and submit to resolve the ticket. Leave the box empty and submit to close it without a response.</p>
+        <mat-form-field appearance="outline">
+          <mat-label>Response (optional)</mat-label>
+          <textarea matInput id="adminResponseText" [(ngModel)]="response" rows="6" maxlength="2000"></textarea>
+          <mat-hint align="end">{{ response.length }} / 2000</mat-hint>
+        </mat-form-field>
+        <button mat-flat-button color="primary" id="submitResponse" (click)="submit()" [disabled]="saving">
+          {{ saving ? 'Saving...' : (response.trim() ? 'Submit and resolve' : 'Submit and close') }}
+        </button>
+      </section>
+  
+      <section class="card" *ngIf="answered" id="adminResponse">
+        <h3>Response</h3>
+        <p class="text" *ngIf="ticket.adminResponse">{{ ticket.adminResponse }}</p>
+        <p class="muted" *ngIf="!ticket.adminResponse">Closed without a written response.</p>
+        <small class="muted" *ngIf="ticket.respondedAt">{{ ticket.respondedAt | date:'medium' }}</small>
+      </section>
+  
+      <section class="card" *ngIf="ticket.feedbackRating != null">
+        <h3>User feedback</h3>
+        <p>Rating: {{ ticket.feedbackRating }} / 5 &nbsp;&middot;&nbsp; Usefulness: {{ ticket.feedbackUsefulness }} / 5</p>
+        <p class="text" *ngIf="ticket.feedbackComment">{{ ticket.feedbackComment }}</p>
+      </section>
+    </ng-container>
+  </div>

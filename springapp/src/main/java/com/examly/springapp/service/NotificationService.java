@@ -21,6 +21,8 @@ public interface NotificationService {
 
     Notification createNotification(Long userId, String title, String message, NotificationType type, String redirectUrl);
 
+    /** Same as above, for a notification about a support ticket. */
+    Notification createNotification(Long userId, String title, String message, NotificationType type, String redirectUrl, Long ticketId);
+
     void notifyUsers(List<Long> userIds, String title, String message, NotificationType type, String redirectUrl);
 }
-

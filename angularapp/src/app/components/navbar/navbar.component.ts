@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { Observable, Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
@@ -23,7 +24,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private auth: AuthService,
     private router: Router,
     private dialog: MatDialog,
-    private notifService: NotificationService
+    private notifService: NotificationService,
+    private snackBar: MatSnackBar
   ) {
     this.notifications$ = this.notifService.notifications$;
     this.unreadCount$ = this.notifService.unreadCount$;
@@ -39,9 +41,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   markAsRead(event: Event, notif: AppNotification): void {
     event.stopPropagation();
-    if (!notif.read) {
-      this.notifService.markAsRead(notif.id).subscribe();
+    this.tryMarkRead(notif);
+  }
+
+  /** The server refuses to mark an admin's unhandled ticket notification as read; tell the admin why. */
+  private tryMarkRead(notif: AppNotification): void {
+    if (notif.read) {
+      return;
     }
+    this.notifService.markAsRead(notif.id).subscribe({
+      error: err => this.snackBar.open(err?.error?.message || 'Could not mark the notification as read', 'OK', { duration: 5000 })
+    });
   }
 
   markAllAsRead(event?: Event): void {
@@ -57,8 +67,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   onNotificationClick(notif: AppNotification): void {
-    if (!notif.read) {
-      this.notifService.markAsRead(notif.id).subscribe();
+    if (!notif.read && notif.type !== NotificationType.TICKET_RAISED) {
+      this.tryMarkRead(notif);
     }
     if (notif.redirectUrl) {
       this.router.navigateByUrl(notif.redirectUrl);
@@ -82,6 +92,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
       case NotificationType.INSTRUCTOR_REJECTION:
       case 'INSTRUCTOR_REJECTION':
         return 'error_outline';
+      case NotificationType.TICKET_CREATED:
+      case NotificationType.TICKET_RAISED:
+        return 'confirmation_number';
+      case NotificationType.TICKET_RESPONSE:
+        return 'support_agent';
+      case NotificationType.TICKET_RESOLVED:
+        return 'task_alt';
       default:
         return 'notifications';
     }
@@ -104,6 +121,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
       case NotificationType.INSTRUCTOR_REJECTION:
       case 'INSTRUCTOR_REJECTION':
         return 'type-rejected';
+      case NotificationType.TICKET_CREATED:
+      case NotificationType.TICKET_RAISED:
+      case NotificationType.TICKET_RESPONSE:
+      case NotificationType.TICKET_RESOLVED:
+        return 'type-enrollment';
       default:
         return 'type-default';
     }

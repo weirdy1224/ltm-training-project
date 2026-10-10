@@ -75,6 +75,8 @@ const routes: Routes = [
   { path: '', canActivate: [AuthGuard], data: CUSTOMER, loadChildren: () => import('./modules/customer/customer.module').then(m => m.CustomerModule) },
   // pages for both roles
   { path: '', canActivate: [AuthGuard], data: ANY, loadChildren: () => import('./modules/course-details/course-details.module').then(m => m.CourseDetailsModule) },
+  // support tickets (each route inside the module has its own AuthGuard and roles)
+  { path: '', loadChildren: () => import('./modules/tickets/tickets.module').then(m => m.TicketsModule) },
 
   { path: 'error', component: ErrorComponent },
   { path: '**', component: ErrorComponent }

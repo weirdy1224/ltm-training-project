@@ -33,6 +33,9 @@ public class Notification {
     @Column(length = 500)
     private String redirectUrl;
 
+    /** Set when the notification is about a support ticket (used to lock an admin's "ticket raised" notification until the ticket is handled). */
+    private Long ticketId;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -106,6 +109,14 @@ public class Notification {
         this.redirectUrl = redirectUrl;
     }
 
+    public Long getTicketId() {
+        return ticketId;
+    }
+
+    public void setTicketId(Long ticketId) {
+        this.ticketId = ticketId;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -114,4 +125,3 @@ public class Notification {
         this.createdAt = createdAt;
     }
 }
-
