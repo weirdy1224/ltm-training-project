@@ -37,7 +37,7 @@ export class CustomerViewCoursesComponent implements OnInit, OnDestroy {
   priceError = '';
   // AI search state
   searchText = ''; // the one search box: used by Search (keyword) and AI Search
-  aiActive = false;
+  aiActive = false; 
   aiLoading = false;
   aiError = '';
   activeQuery = '';

@@ -78,7 +78,12 @@ export const API = {
   REVIEW_BY_USER: '/api/review/user',
   REVIEW_BY_COURSE: '/api/review/course',
   REVIEW_SUMMARY: '/api/review/summary',
-  REVIEW_MY: '/api/review/my'
+  REVIEW_MY: '/api/review/my',
+
+  // notifications
+  NOTIFICATIONS: '/api/notifications',
+  NOTIFICATIONS_UNREAD_COUNT: '/api/notifications/unread-count',
+  NOTIFICATIONS_READ_ALL: '/api/notifications/read-all'
 };
 
 /** localStorage keys (the SRS keeps the JWT in localStorage). */

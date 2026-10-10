@@ -1,7 +1,6 @@
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { API, API_URL } from '../constant';
 import { CourseVideo } from '../models/video.model';
 
@@ -52,9 +51,4 @@ export class VideoService {
     return this.http.delete<void>(`${this.apiUrl}${API.VIDEO}/${videoId}`);
   }
 
-  /** The full URL to put into a <video> tag. It stops working after a while, so ask again when a lesson is opened. */
-  streamUrl(videoId: number): Observable<string> {
-    return this.http.post<{ token: string; streamPath: string }>(`${this.apiUrl}${API.VIDEO}/${videoId}/stream-token`, {})
-      .pipe(map(res => `${this.apiUrl}${res.streamPath}`));
-  }
 }
