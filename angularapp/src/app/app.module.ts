@@ -15,6 +15,8 @@ import { ErrorComponent } from './components/error/error.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { AiModule } from './modules/ai/ai.module';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { QuizLoaderComponent } from './components/quiz-loader/quiz-loader.component';
 
 /**
 * Only what every visitor needs is loaded up front: the navbar, home, dashboard, error page and the dialog.
@@ -23,8 +25,8 @@ import { AiModule } from './modules/ai/ai.module';
 * @author Team Lead
 */
 @NgModule({
-  declarations: [AppComponent, NavbarComponent, HomeComponent, DashboardComponent, ErrorComponent, ConfirmDialogComponent, FooterComponent],
-  imports: [BrowserModule, BrowserAnimationsModule, HttpClientModule, SharedModule, AiModule,AppRoutingModule],
+  declarations: [AppComponent, NavbarComponent, HomeComponent, DashboardComponent, ErrorComponent, ConfirmDialogComponent, FooterComponent, QuizLoaderComponent],
+  imports: [BrowserModule, BrowserAnimationsModule, HttpClientModule, SharedModule, AiModule,AppRoutingModule,MatProgressSpinnerModule],
   providers: [
     // the token is added to API calls here and nowhere else (guideline 24)
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
