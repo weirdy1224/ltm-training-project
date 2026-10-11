@@ -1,5 +1,6 @@
 # 94aa059b-3b64-44c6-859d-a906d5df3bb7-aea7e6a9-1178-4cfd-8130-e80d0bc6b3ce
 https://sonar.server.examly.io/dashboard?id=iamneo-production-2_94aa059b-3b64-44c6-859d-a906d5df3bb7-aea7e6a9-1178-4cfd-8130-e80d0bc6b3ce&amp;codeScope=overall
+
 # 🎓 EduVerse - AI-Powered E-Learning & Course Marketplace Platform
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen.svg?logo=springboot)](https://spring.io/projects/spring-boot)
@@ -347,15 +348,6 @@ Upon application startup, an initial administrator account is automatically init
 | **Super Admin** | `admin@elearning.com` | `Admin@12345` | Complete platform governance & admin management |
 | **New Learner** | *Self-register via UI* | *Chosen during signup* | Course browsing, purchase, AI quiz/assistant |
 | **Instructor** | *Apply via UI* | *Chosen during signup* | Course creation upon Admin approval |
-
----
-
-## 📊 Code Quality & SonarQube
-
-This project adheres to strict coding standards with automated static code analysis, vulnerability scanning, and code smell tracking:
-
-* **SonarQube Dashboard**: [SonarQube Project Quality Gate](https://sonar.server.examly.io/dashboard?id=iamneo-production-2_94aa059b-3b64-44c6-859d-a906d5df3bb7-aea7e6a9-1178-4cfd-8130-e80d0bc6b3ce&codeScope=overall)
-* **Sonar Project Key**: `iamneo-production-2_94aa059b-3b64-44c6-859d-a906d5df3bb7-aea7e6a9-1178-4cfd-8130-e80d0bc6b3ce`
 
 ---
 
