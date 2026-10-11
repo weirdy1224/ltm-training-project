@@ -49,6 +49,10 @@ public class SecurityConfig {
         private final int globalPerMinute;
         private final int authPerMinute;
 
+        private final String ROLE_CUSTOMER = "CUSTOMER";
+        private final String ROLE_ADMIN = "ADMIM";
+        private final String ROLE_INSTRUCTOR = "INSTRUCTOR";
+
         public SecurityConfig(JwtUtil jwtUtil, UserRepo userRepo, RateLimiter rateLimiter,
                         @Value("${ratelimit.global.per-minute:120}") int globalPerMinute,
                         @Value("${ratelimit.auth.per-minute:10}") int authPerMinute) {
@@ -121,117 +125,100 @@ public class SecurityConfig {
                                                         "/ws/**"
                                                 )
                                                 .permitAll()
-                                                // a <video> tag cannot send the Authorization header, so streaming is
-                                                // protected by
-                                                // the signed, short-lived token in the URL (checked in VideoController)
+                                                // a <video> tag cannot send the Authorization header, so streaming is protected by the signed, short-lived token in the URL (checked in VideoController)
                                                 .requestMatchers(HttpMethod.GET, "/api/video/*/stream").permitAll()
-                                                // API documentation (normally served by the swagger chain above; listed
-                                                // here
-                                                // too so it is never blocked)
+                                                // API documentation (normally served by the swagger chain above; listed here too so it is never blocked)
                                                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs",
                                                                 "/v3/api-docs/**",
                                                                 "/v3/api-docs.yaml")
                                                 .permitAll()
-                                                // uploaded course images are public so the browser can show them in an
-                                                // <img> tag (read only)
+                                                // uploaded course images are public so the browser can show them in an <img> tag (read only)
                                                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                                                 // course image upload: admin and instructors
                                                 .requestMatchers(HttpMethod.POST, "/api/upload/**")
-                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR")
-                                                // admin management: only an existing admin can list, add or remove
-                                                // admins
-                                                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_INSTRUCTOR)
+                                                // admin management: only an existing admin can list, add or remove admins
+                                                .requestMatchers("/api/admin/**").hasAuthority(ROLE_ADMIN)
                                                 // AI quiz and chatbot: logged-in customers only
-                                                .requestMatchers("/api/ai/**").hasAuthority("CUSTOMER")
+                                                .requestMatchers("/api/ai/**").hasAuthority(ROLE_CUSTOMER)
                                                 // AI search: logged-in customers only (usage is limited per user)
-                                                .requestMatchers("/api/course-ai/search").hasAuthority("CUSTOMER")
-                                                // courses ("/api/course/search" is listed first for clarity; the
-                                                // general GET
-                                                // rule below also covers it)
+                                                .requestMatchers("/api/course-ai/search").hasAuthority(ROLE_CUSTOMER)
+                                                // courses ("/api/course/search" is listed first for clarity; the general GET rule below also covers it)
                                                 // an instructor's own courses (must stay above the general GET rule)
                                                 .requestMatchers(HttpMethod.GET, "/api/course/mine")
-                                                .hasAuthority("INSTRUCTOR")
+                                                .hasAuthority(ROLE_INSTRUCTOR)
                                                 .requestMatchers(HttpMethod.GET, "/api/course/search")
-                                                .hasAnyAuthority("ADMIN", "CUSTOMER", "INSTRUCTOR")
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_CUSTOMER, ROLE_INSTRUCTOR)
                                                 .requestMatchers(HttpMethod.GET, "/api/course", "/api/course/**")
-                                                .hasAnyAuthority("ADMIN", "CUSTOMER", "INSTRUCTOR")
-                                                // add / edit / delete: admin, or an instructor (ownership is checked
-                                                // again in the controller)
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_CUSTOMER, ROLE_INSTRUCTOR)
+                                                // add / edit / delete: admin, or an instructor (ownership is checked again in the controller)
                                                 .requestMatchers("/api/course", "/api/course/**")
-                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR")
-                                                // video lessons: managing needs admin or instructor (ownership checked
-                                                // in the service);
-                                                // watching also needs the course to be bought, which the service checks
-                                                // too
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_INSTRUCTOR)
+                                                // video lessons: managing needs admin or instructor (ownership checked in the service);
+                                                // watching also needs the course to be bought, which the service checks too
                                                 .requestMatchers(HttpMethod.POST, "/api/video/course/*")
-                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR")
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_INSTRUCTOR)
                                                 .requestMatchers(HttpMethod.PUT, "/api/video/*")
-                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR")
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_INSTRUCTOR)
                                                 .requestMatchers(HttpMethod.DELETE, "/api/video/*")
-                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR")
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_INSTRUCTOR)
                                                 .requestMatchers(HttpMethod.GET, "/api/video/course/*")
-                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR", "CUSTOMER")
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_INSTRUCTOR, ROLE_CUSTOMER)
                                                 .requestMatchers(HttpMethod.POST, "/api/video/*/stream-token")
-                                                .hasAnyAuthority("ADMIN", "INSTRUCTOR", "CUSTOMER")
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_INSTRUCTOR, ROLE_CUSTOMER)
                                                 // customers (ownership is checked again inside the controller)
                                                 .requestMatchers(HttpMethod.POST, "/api/customer")
-                                                .hasAuthority("CUSTOMER")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 .requestMatchers(HttpMethod.PUT, "/api/customer/**")
-                                                .hasAuthority("CUSTOMER")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 .requestMatchers(HttpMethod.GET, "/api/customer/user/**")
-                                                .hasAuthority("CUSTOMER")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 .requestMatchers(HttpMethod.GET, "/api/customer/**")
-                                                .hasAuthority("ADMIN")
+                                                .hasAuthority(ROLE_ADMIN)
                                                 // payment
                                                 .requestMatchers("/api/payment/**")
-                                                .hasAuthority("CUSTOMER")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 // orders
-                                                .requestMatchers(HttpMethod.POST, "/api/order").hasAuthority("CUSTOMER")
-                                                .requestMatchers(HttpMethod.GET, "/api/order").hasAuthority("ADMIN")
+                                                .requestMatchers(HttpMethod.POST, "/api/order").hasAuthority(ROLE_CUSTOMER)
+                                                .requestMatchers(HttpMethod.GET, "/api/order").hasAuthority(ROLE_ADMIN)
                                                 .requestMatchers(HttpMethod.GET, "/api/order/customer/**")
-                                                .hasAuthority("CUSTOMER")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 .requestMatchers(HttpMethod.GET, "/api/order/**")
-                                                .hasAnyAuthority("ADMIN", "CUSTOMER")
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_CUSTOMER)
                                                 .requestMatchers(HttpMethod.DELETE, "/api/order/**")
-                                                .hasAuthority("CUSTOMER")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 // invoice
-                                                .requestMatchers(
-                                                                HttpMethod.GET,
-                                                                "/api/invoice/**")
-                                                .hasAuthority("CUSTOMER")
-
+                                                .requestMatchers(HttpMethod.GET,"/api/invoice/**")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 // reviews
                                                 .requestMatchers(HttpMethod.POST, "/api/review")
-                                                .hasAuthority("CUSTOMER")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 .requestMatchers(HttpMethod.GET, "/api/review/user/**")
-                                                .hasAuthority("CUSTOMER")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 .requestMatchers(HttpMethod.GET, "/api/review/summary",
                                                                 "/api/review/course/**")
-                                                .hasAnyAuthority("ADMIN", "CUSTOMER", "INSTRUCTOR")
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_CUSTOMER, ROLE_INSTRUCTOR)
                                                 .requestMatchers(HttpMethod.GET, "/api/review", "/api/review/**")
-                                                .hasAnyAuthority("ADMIN", "CUSTOMER")
-                                                // a customer may delete only their own review (ownership is checked in
-                                                // the controller);
-                                                // this rule must stay ABOVE the admin rule below because the first
-                                                // matching rule wins
+                                                .hasAnyAuthority(ROLE_ADMIN, ROLE_CUSTOMER)
+                                                // a customer may delete only their own review (ownership is checked in the controller);
+                                                // this rule must stay ABOVE the admin rule below because the first matching rule wins
                                                 .requestMatchers(HttpMethod.DELETE, "/api/review/my/**")
-                                                .hasAuthority("CUSTOMER")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 .requestMatchers(HttpMethod.DELETE, "/api/review/**")
-                                                .hasAuthority("ADMIN")
-                                                // dashboards: customers see their own numbers (checked again in the
-                                                // controller), admins see the platform
+                                                .hasAuthority(ROLE_ADMIN)
+                                                // dashboards: customers see their own numbers (checked again in the controller), admins see the platform
                                                 .requestMatchers(HttpMethod.GET, "/api/dashboard/admin")
-                                                .hasAuthority("ADMIN")
+                                                .hasAuthority(ROLE_ADMIN)
                                                 .requestMatchers(HttpMethod.GET, "/api/dashboard/customer/**")
-                                                .hasAuthority("CUSTOMER")
+                                                .hasAuthority(ROLE_CUSTOMER)
                                                 .requestMatchers(HttpMethod.GET, "/api/dashboard/instructor")
-                                                .hasAuthority("INSTRUCTOR")
+                                                .hasAuthority(ROLE_INSTRUCTOR)
                                                 // carts
-                                                .requestMatchers(HttpMethod.GET, "/api/cart").hasAuthority("ADMIN")
-                                                .requestMatchers("/api/cart", "/api/cart/**").hasAuthority("CUSTOMER")
+                                                .requestMatchers(HttpMethod.GET, "/api/cart").hasAuthority(ROLE_ADMIN)
+                                                .requestMatchers("/api/cart", "/api/cart/**").hasAuthority(ROLE_CUSTOMER)
                                                 // support tickets: customers and instructors raise and read their own (admins use /api/admin/tickets)
-                                                .requestMatchers("/api/tickets", "/api/tickets/**").hasAnyAuthority("CUSTOMER", "INSTRUCTOR")
-                                                .requestMatchers("/api/notifications", "/api/notifications/**").hasAnyAuthority("ADMIN", "INSTRUCTOR", "CUSTOMER")
+                                                .requestMatchers("/api/tickets", "/api/tickets/**").hasAnyAuthority(ROLE_CUSTOMER, ROLE_INSTRUCTOR)
+                                                .requestMatchers("/api/notifications", "/api/notifications/**").hasAnyAuthority(ROLE_ADMIN, ROLE_INSTRUCTOR, ROLE_CUSTOMER)
                                                 .anyRequest().authenticated());
                 // filter order: request id -> rate limit -> JWT
                 http.addFilterBefore(new RateLimitFilter(rateLimiter, globalPerMinute, authPerMinute),
