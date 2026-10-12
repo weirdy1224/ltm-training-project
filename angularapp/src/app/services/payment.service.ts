@@ -8,7 +8,7 @@ import { Injectable } from '@angular/core';
   export class PaymentService {
   
     private api =
-    'https://8080-dbccbeadcdadbbfacbafdfacaeaeacfdedbcbce.premiumproject.examly.io/api/payment';
+    'https://8080-abcbaaaeacafecdadbbfacbafdfacaeaeacfdedbcbce.premiumproject.examly.io/api/payment';
   
     constructor(
         private http: HttpClient) {}

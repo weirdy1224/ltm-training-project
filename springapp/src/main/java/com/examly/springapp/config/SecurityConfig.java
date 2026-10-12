@@ -49,9 +49,9 @@ public class SecurityConfig {
         private final int globalPerMinute;
         private final int authPerMinute;
 
-        private final String ROLE_CUSTOMER = "CUSTOMER";
-        private final String ROLE_ADMIN = "ADMIM";
-        private final String ROLE_INSTRUCTOR = "INSTRUCTOR";
+        private static final String ROLE_CUSTOMER = "CUSTOMER";
+        private static final String ROLE_ADMIN = "ADMIN";
+        private static final String ROLE_INSTRUCTOR = "INSTRUCTOR";
 
         public SecurityConfig(JwtUtil jwtUtil, UserRepo userRepo, RateLimiter rateLimiter,
                         @Value("${ratelimit.global.per-minute:120}") int globalPerMinute,
